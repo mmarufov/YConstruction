@@ -5,6 +5,7 @@ struct DefectReport: Codable {
     let location: String
     let severity: Severity
     let visualDescription: String
+    let spokenResponse: String
     let transcript: String
     let codeReferenceId: String?
     let confidence: Double

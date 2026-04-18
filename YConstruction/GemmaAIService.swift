@@ -139,6 +139,7 @@ final class GemmaAIService: SiteVoiceAI {
         let severityStr = (obj["severity"] as? String) ?? "low"
         let severity = DefectReport.Severity(rawValue: severityStr) ?? .low
         let visual = obj["visual_description"] as? String ?? ""
+        let spoken = obj["spoken_response"] as? String ?? visual
         let code = obj["code_reference_id"] as? String
         let confidence = (obj["confidence"] as? NSNumber)?.doubleValue ?? 0.0
 
@@ -147,6 +148,7 @@ final class GemmaAIService: SiteVoiceAI {
             location: "",
             severity: severity,
             visualDescription: visual,
+            spokenResponse: spoken,
             transcript: transcript,
             codeReferenceId: code?.isEmpty == true ? nil : code,
             confidence: confidence,

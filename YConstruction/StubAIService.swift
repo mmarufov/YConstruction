@@ -17,6 +17,7 @@ final class StubAIService: SiteVoiceAI {
             location: "North wall, Room 204, Floor 2",
             severity: .high,
             visualDescription: "A diagonal structural crack approximately 30 cm long runs across the upper portion of the interior drywall.",
+            spokenResponse: "I see a vertical structural crack about a foot long. High severity under IBC 2308.5 — I'm logging it now.",
             transcript: transcript,
             codeReferenceId: "IBC 2308.5",
             confidence: 0.87,
