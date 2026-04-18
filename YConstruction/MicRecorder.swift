@@ -1,5 +1,6 @@
 import Foundation
 import AVFoundation
+import Combine
 
 @MainActor
 final class MicRecorder: ObservableObject {

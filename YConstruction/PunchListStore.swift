@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import SwiftUI
 
 final class PunchListStore: ObservableObject {
     @Published private(set) var items: [DefectReport] = []

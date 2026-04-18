@@ -1,6 +1,7 @@
 import SwiftUI
 import AVFoundation
 import UIKit
+import Combine
 
 final class CameraCaptureController: NSObject, ObservableObject, AVCapturePhotoCaptureDelegate {
     @Published var isReady: Bool = false
