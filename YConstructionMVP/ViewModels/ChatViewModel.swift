@@ -567,31 +567,18 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
+    /// Reached when the worker speaks WITHOUT a staged photo (e.g. right after
+    /// an upload completes and the session is cleared). The hackathon flow is
+    /// photo-first, so we do NOT kick off a freeform Gemma chat here — that's
+    /// what produced the spurious "Okay, I'm ready to help!" after uploads.
+    /// Just log, set a short status, and stay silent.
     private func handleGeneralAssistantTurn(
         transcript: SpeechTranscriptionResult,
         capturedAudio: CapturedAudio
     ) async throws {
-        isLoading = true
-        statusText = "Sending to local \(modelDisplayName)..."
-
-        let request = AIRequest(
-            prompt: transcript.text,
-            imagePaths: [],
-            audioPaths: LocalModelStore.supportsDirectAudioInput ? [capturedAudio.fileURL.path] : [],
-            maxTokens: 128
-        )
-        let response = try await aiService.send(
-            request: request,
-            conversation: messages
-        )
-
-        appendMessage(Message(text: response.text, sender: .assistant))
-        latestReply = response.text
-        lastRuntimeText = formatRuntimeStats(response.runtimeStats)
-        statusText = response.runtimeStats?.cloudHandoff == true
-            ? "Response arrived through cloud handoff."
-            : "Local response ready."
-        speak(response.text)
+        _ = capturedAudio
+        ycLog("[handleGeneralAssistantTurn] transcript=\"\(transcript.text)\" — no photo staged, staying silent")
+        statusText = "Take a photo to start a new report."
     }
 
     private func handleStagedPhotoTurn(
@@ -776,11 +763,11 @@ final class ChatViewModel: ObservableObject {
 
                 let assistantText: String
                 if syncResult.wasUploaded && syncResult.photoUploaded {
-                    assistantText = "Uploaded to Supabase."
-                    statusText = "Uploaded to Supabase."
+                    assistantText = "Uploaded to Supabase. Done!"
+                    statusText = "Uploaded to Supabase. Done!"
                     showToast("Uploaded to Supabase")
                 } else {
-                    assistantText = "Issue saved locally with its photo. It will upload automatically on Wi-Fi or when you tap Sync Now."
+                    assistantText = "Saved locally. Done!"
                     statusText = "Issue queued locally for Supabase."
                     showToast("Queued locally — will upload on Wi-Fi")
                 }
@@ -795,11 +782,9 @@ final class ChatViewModel: ObservableObject {
 
                 clearStagedPhotoSession(deleteLocalPhoto: false)
                 await refreshLocalSearchStatus()
-
-                // Kick off a Gemma insight question on top of the upload ack.
-                // Streams tokens into a sentence-buffered speaker so the worker
-                // hears the question as it generates, not 10s after.
-                await runReportInsight(for: outcome.state)
+                // Intentionally no post-upload Gemma call. The multi-turn flow
+                // already asked its follow-ups BEFORE upload; after upload the
+                // assistant stays silent until the next photo.
             } catch {
                 stagedPhotoSession = .report(outcome.state)
                 let assistantText = "I mapped the report, but saving it for Supabase failed. The staged photo is still here, and you can try again. \(error.localizedDescription)"
@@ -820,32 +805,6 @@ final class ChatViewModel: ObservableObject {
             Photo report is still being tagged locally.
             \(outcome.state.fields.compactSummaryLines().joined(separator: "\n"))
             """
-        }
-    }
-
-    /// After the hardcoded report upload, ask Gemma for one short follow-up
-    /// question and speak it via the same TTS path as the upload ack. The
-    /// coordinator returns an empty string if Gemma drifts off-topic — in
-    /// that case we skip the follow-up entirely instead of reading the drift.
-    /// Upload has already succeeded, so any error here is logged and swallowed.
-    private func runReportInsight(for state: PhotoReportState) async {
-        statusText = "Gemma is preparing a follow-up…"
-        do {
-            let response = try await photoTurnCoordinator.generateReportInsight(state: state)
-            let cleaned = response.text.trimmingCharacters(in: .whitespacesAndNewlines)
-            if cleaned.isEmpty {
-                ycLog("[runReportInsight] Gemma insight drifted — skipping spoken follow-up")
-            } else {
-                appendMessage(Message(text: cleaned, sender: .assistant))
-                latestReply = cleaned
-                lastRuntimeText = formatRuntimeStats(response.runtimeStats)
-                // Queue after the "Uploaded to Supabase." ack so it doesn't
-                // interrupt mid-utterance and the voice stays consistent.
-                speakQueued(cleaned)
-            }
-            statusText = "Ready on iPhone."
-        } catch {
-            ycLog("[runReportInsight] insight generation failed: \(error.localizedDescription)")
         }
     }
 

@@ -529,45 +529,15 @@ actor PhotoTurnCoordinator {
     static let reportFollowUpQuestion =
         "How critical is it, and what level is it on?"
 
-    /// After the hardcoded 2-turn upload lands, ask Gemma for one short
-    /// follow-up question about the specific defect.
-    ///
-    /// Non-streaming on purpose: we wait for the full reply, strip it to a
-    /// single question, then the caller speaks it via the same TTS path as
-    /// the upload ack. Streaming was causing drift to be spoken before the
-    /// post-filter could reject it.
-    ///
-    /// Returns an AIResponse whose `text` is either a cleaned single
-    /// question or an empty string (meaning Gemma drifted and we should say
-    /// nothing extra).
-    func generateReportInsight(state: PhotoReportState) async throws -> AIResponse {
-        let defectType = PhotoReportFields.normalizedText(state.fields.defectType) ?? "defect"
-        let severity = PhotoReportFields.normalizedText(state.fields.severity) ?? "unspecified"
-        let storey = PhotoReportFields.normalizedText(state.fields.storey) ?? "an unspecified level"
-        let elementType = PhotoReportFields.normalizedText(state.fields.elementType) ?? "surface"
-        let orientation = PhotoReportFields.normalizedText(state.fields.orientation)
-        let orientationClause = orientation.map { " facing \($0)" } ?? ""
+    /// Number of Gemma-generated follow-up questions to ask AFTER the hardcoded
+    /// turn 1 question, before forcing the upload. So the total flow is:
+    ///  - Turn 1: hardcoded critical+level question
+    ///  - Turns 2..(1+N): Gemma-generated specific follow-ups
+    ///  - Turn (2+N): forced upload
+    static let gemmaFollowUpCount = 2
 
-        let prompt = """
-        A worker reported a \(severity) \(defectType) on the \(elementType)\(orientationClause), on \(storey).
-
-        Reply with exactly ONE short follow-up question (under 15 words) that a supervisor would ask to plan repair or investigation. Be specific to this defect. Do not restate the details. Do not add any explanation. End with a question mark.
-
-        Example for "high crack on wall, Level 1, east": "Is the crack continuing to widen, or has it stabilized?"
-
-        Your question:
-        """
-        let started = Date()
-        ycLog("[generateReportInsight] start — defect=\(defectType) severity=\(severity) storey=\(storey)")
-        let response = try await aiService.send(
-            request: AIRequest(prompt: prompt, maxTokens: 40),
-            conversation: []
-        )
-        let elapsed = Date().timeIntervalSince(started)
-        let cleaned = Self.cleanInsightQuestion(response.text) ?? ""
-        ycLog("[generateReportInsight] done in \(String(format: "%.2f", elapsed))s textLen=\(response.text.count) cleaned=\"\(cleaned)\"")
-        return AIResponse(text: cleaned, runtimeStats: response.runtimeStats)
-    }
+    /// Total number of worker utterances required before the upload fires.
+    static var reportTotalTurnsBeforeUpload: Int { 1 + gemmaFollowUpCount }
 
     /// Reject Gemma insight output that isn't a single question.
     /// Returns nil when the response drifted off-topic (no question mark, or
@@ -595,17 +565,18 @@ actor PhotoTurnCoordinator {
         return nil
     }
 
-    /// Deterministic two-turn report flow:
+    /// Deterministic multi-turn report flow:
     ///
-    ///   Turn 1 (initial report trigger) → speak `reportFollowUpQuestion`,
-    ///                                     do not upload yet.
-    ///   Turn 2 (any reply) → extract severity/storey best-effort from the
-    ///                        reply, stuff the question + reply into
-    ///                        ai_safety_notes, force readyToUpload=true and
-    ///                        upload to Supabase regardless of content.
+    ///   Turn 1: hardcoded "How critical is it, and what level is it on?"
+    ///   Turns 2..(1+N): Gemma-generated follow-up questions (one per turn,
+    ///                   specific to the defect). N = `gemmaFollowUpCount`.
+    ///   Turn (2+N): upload. Caller speaks "Uploaded to Supabase. Done!"
+    ///               and stops — no insight, no chatter.
     ///
-    /// No Gemma calls, no heuristic ambiguity, no re-asking. Saves 10–30s per
-    /// turn and guarantees a row lands after exactly two voice turns.
+    /// Every worker transcript is preserved into `ai_safety_notes` before the
+    /// upload row lands. Gemma is only invoked on the middle turns and each
+    /// invocation is capped to ~40 tokens with post-filtering, so drift can't
+    /// leak into the TTS.
     func processReportTurn(
         existingState: PhotoReportState?,
         newTranscript: String,
@@ -624,8 +595,10 @@ actor PhotoTurnCoordinator {
         state.transcriptSnippets.append(newTranscript)
         applyReportHeuristics(to: &state, newTranscript: newTranscript)
 
-        // Turn 1 — always ask the combined critical+level question, never upload.
-        if state.transcriptSnippets.count <= 1 {
+        let turn = state.transcriptSnippets.count
+
+        // Turn 1 — hardcoded severity + level question.
+        if turn == 1 {
             ycLog("[processReportTurn] turn 1 — asking fixed follow-up: \(Self.reportFollowUpQuestion)")
             return PhotoReportTurnOutcome(
                 state: state,
@@ -635,28 +608,84 @@ actor PhotoTurnCoordinator {
             )
         }
 
-        // Turn 2+ — upload unconditionally. Preserve the question + reply in
-        // ai_safety_notes so Supabase sees the full exchange.
-        let replyTranscript = newTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
-        let exchangeNote = "Asked: \"\(Self.reportFollowUpQuestion)\" Reply: \"\(replyTranscript)\""
-        let existingNotes = PhotoReportFields.normalizedText(state.fields.aiSafetyNotes)
-        let combinedNotes: String
-        if let existingNotes {
-            combinedNotes = "\(existingNotes) \(exchangeNote)"
-        } else {
-            combinedNotes = exchangeNote
+        // Turns 2..(1+N) — Gemma-generated single follow-up question.
+        if turn <= Self.reportTotalTurnsBeforeUpload {
+            let prompt = Self.makeReportFollowUpPrompt(for: state)
+            ycLog("[processReportTurn] turn \(turn) — asking Gemma for follow-up #\(turn - 1)")
+            do {
+                let response = try await aiService.send(
+                    request: AIRequest(prompt: prompt, maxTokens: 40),
+                    conversation: []
+                )
+                let cleaned = Self.cleanInsightQuestion(response.text)
+                if let cleaned, !cleaned.isEmpty {
+                    ycLog("[processReportTurn] turn \(turn) — Gemma Q: \"\(cleaned)\"")
+                    return PhotoReportTurnOutcome(
+                        state: state,
+                        readyToUpload: false,
+                        assistantMessage: cleaned,
+                        runtimeStats: response.runtimeStats
+                    )
+                }
+                ycLog("[processReportTurn] turn \(turn) — Gemma drifted; falling through to upload early")
+            } catch {
+                ycLog("[processReportTurn] turn \(turn) — Gemma follow-up failed: \(error.localizedDescription); falling through to upload")
+            }
+            // Fall through to upload on failure/drift.
         }
-        state.fields.aiSafetyNotes = combinedNotes
+
+        // Upload turn — stuff the full exchange into ai_safety_notes so the
+        // Supabase row captures every transcript verbatim.
+        let exchangeNote = state.transcriptSnippets.enumerated()
+            .map { idx, snippet in
+                let clean = snippet.trimmingCharacters(in: .whitespacesAndNewlines)
+                return "Turn \(idx + 1): \"\(clean)\""
+            }
+            .joined(separator: " | ")
+        state.fields.aiSafetyNotes = exchangeNote
         state.lastBlockingFields = []
         state.repeatedFollowUpCount = 0
 
-        ycLog("[processReportTurn] turn \(state.transcriptSnippets.count) — forcing upload (hardcoded two-turn flow)")
+        ycLog("[processReportTurn] turn \(turn) — forcing upload")
         return PhotoReportTurnOutcome(
             state: state,
             readyToUpload: true,
-            assistantMessage: "Uploading to Supabase.",
+            assistantMessage: "Uploaded to Supabase. Done!",
             runtimeStats: nil
         )
+    }
+
+    /// Prompt for the mid-flow Gemma follow-ups. Tightly scoped — asks for
+    /// exactly one concrete construction-inspection question about the
+    /// defect, not restating known facts.
+    private static func makeReportFollowUpPrompt(for state: PhotoReportState) -> String {
+        let defectType = PhotoReportFields.normalizedText(state.fields.defectType) ?? "unknown defect"
+        let severity = PhotoReportFields.normalizedText(state.fields.severity) ?? "unknown severity"
+        let storey = PhotoReportFields.normalizedText(state.fields.storey) ?? "unknown level"
+        let elementType = PhotoReportFields.normalizedText(state.fields.elementType) ?? "surface"
+        let orientation = PhotoReportFields.normalizedText(state.fields.orientation) ?? "unknown side"
+
+        let transcriptLines = state.transcriptSnippets.enumerated()
+            .map { idx, snippet in
+                "T\(idx + 1): \(snippet.trimmingCharacters(in: .whitespacesAndNewlines))"
+            }
+            .joined(separator: "\n")
+
+        return """
+        You are a construction inspector documenting a defect. Known so far:
+        - Defect: \(defectType), severity \(severity)
+        - Location: \(orientation) \(elementType) on \(storey)
+
+        Worker transcript:
+        \(transcriptLines)
+
+        Ask ONE specific follow-up question (under 12 words) that an inspector would need to answer before filing this defect. Focus on dimensions, cause, visible damage, adjacent elements, or safety risk. Do not restate the known facts. Do not explain. End with a question mark.
+
+        Example for graffiti: "How large is the graffiti across the wall?"
+        Example for cracks: "Does the crack go through the full wall thickness?"
+
+        Your question:
+        """
     }
 
     func processQueryTurn(
