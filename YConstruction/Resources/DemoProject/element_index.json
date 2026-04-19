@@ -1,0 +1,2940 @@
+{
+  "project_id": "duplex-demo-001",
+  "schema": "IFC2X3",
+  "storeys": [
+    {
+      "name": "T/FDN",
+      "elevation": -1.25,
+      "height_range": [
+        -1.25,
+        0.0
+      ]
+    },
+    {
+      "name": "Level 1",
+      "elevation": 0.0,
+      "height_range": [
+        0.0,
+        3.100000000000378
+      ]
+    },
+    {
+      "name": "Level 2",
+      "elevation": 3.100000000000378,
+      "height_range": [
+        3.100000000000378,
+        6.00000000000039
+      ]
+    },
+    {
+      "name": "Roof",
+      "elevation": 6.00000000000039,
+      "height_range": [
+        6.00000000000039,
+        9.00000000000039
+      ]
+    }
+  ],
+  "elements": {
+    "2O2Fr$t4X7Zf8NOew3FNld": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FNld",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "B101",
+      "orientation": "north",
+      "centroid": [
+        2.5379999999999994,
+        -2.2085000000000057,
+        1.397500000000098
+      ],
+      "bbox": [
+        [
+          2.476,
+          -4.000000000000004,
+          0.0
+        ],
+        [
+          2.5999999999999996,
+          -0.41700000000000775,
+          2.795000000000196
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):138584"
+    },
+    "2O2Fr$t4X7Zf8NOew3FKIu": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FKIu",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "A204",
+      "orientation": "south",
+      "centroid": [
+        5.497999999999999,
+        -10.30800000000003,
+        1.397500000000098
+      ],
+      "bbox": [
+        [
+          4.769999999999999,
+          -10.370000000000031,
+          0.0
+        ],
+        [
+          6.225999999999999,
+          -10.246000000000029,
+          2.795000000000196
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):139783"
+    },
+    "2O2Fr$t4X7Zf8NOew3FKGS": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FKGS",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "A203",
+      "orientation": "south",
+      "centroid": [
+        6.262000000000002,
+        -15.591499999999996,
+        1.397500000000098
+      ],
+      "bbox": [
+        [
+          6.200000000000001,
+          -17.382999999999992,
+          0.0
+        ],
+        [
+          6.324000000000002,
+          -13.8,
+          2.795000000000196
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):139939"
+    },
+    "2O2Fr$t4X7Zf8NOew3FNau": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FNau",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "B204",
+      "orientation": "west",
+      "centroid": [
+        2.5120000000000022,
+        -8.197499999999986,
+        1.2067500000000493
+      ],
+      "bbox": [
+        [
+          2.450000000000002,
+          -9.725000000000009,
+          0.0
+        ],
+        [
+          2.5740000000000016,
+          -6.804999999999967,
+          2.795000000000196
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):139143"
+    },
+    "2O2Fr$t4X7Zf8NOew3FK80": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FK80",
+      "elementType": "wall",
+      "storey": "T/FDN",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        4.400000000000001,
+        -0.2084999999999981,
+        -0.625
+      ],
+      "bbox": [
+        [
+          0.0,
+          -0.4169999999999981,
+          -1.25
+        ],
+        [
+          8.800000000000002,
+          1.887379141862766e-15,
+          0.0
+        ]
+      ],
+      "name": "Basic Wall:Foundation - Concrete (417mm):140479"
+    },
+    "2O2Fr$t4X7Zf8NOew3FNhv": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FNhv",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        0.20849999999999902,
+        -7.583999999999999,
+        1.2516666666666991
+      ],
+      "bbox": [
+        [
+          -1.0547118733938987e-15,
+          -17.382999999999967,
+          0.0
+        ],
+        [
+          0.41699999999999904,
+          -0.41699999999999804,
+          3.100000000000196
+        ]
+      ],
+      "name": "Basic Wall:Exterior - Brick on Block:138310"
+    },
+    "2O2Fr$t4X7Zf8NOew3FK9N": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FK9N",
+      "elementType": "wall",
+      "storey": "T/FDN",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        8.591500000000003,
+        -9.108500000000019,
+        -0.625
+      ],
+      "bbox": [
+        [
+          8.383000000000003,
+          -17.800000000000015,
+          -1.25
+        ],
+        [
+          8.800000000000004,
+          -0.41700000000002374,
+          0.0
+        ]
+      ],
+      "name": "Basic Wall:Foundation - Concrete (417mm):140520"
+    },
+    "2O2Fr$t4X7Zf8NOew3FKEr": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FKEr",
+      "elementType": "wall",
+      "storey": "T/FDN",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        4.191499999999988,
+        -17.59150000000001,
+        -0.625
+      ],
+      "bbox": [
+        [
+          0.0,
+          -17.80000000000001,
+          -1.25
+        ],
+        [
+          8.382999999999976,
+          -17.38300000000001,
+          0.0
+        ]
+      ],
+      "name": "Basic Wall:Foundation - Concrete (417mm):140554"
+    },
+    "2O2Fr$t4X7Zf8NOew3FKST": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FKST",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "A204",
+      "orientation": "east",
+      "centroid": [
+        6.2879999999999985,
+        -9.603500000000022,
+        1.2067500000000493
+      ],
+      "bbox": [
+        [
+          6.225999999999999,
+          -10.99500000000004,
+          0.0
+        ],
+        [
+          6.35,
+          -8.075,
+          2.795000000000196
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):139682"
+    },
+    "2O2Fr$t4X7Zf8NOew3FKE5": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FKE5",
+      "elementType": "wall",
+      "storey": "T/FDN",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        0.2085000000000006,
+        -8.899999999999995,
+        -0.625
+      ],
+      "bbox": [
+        [
+          5.551115123125783e-16,
+          -17.38299999999999,
+          -1.25
+        ],
+        [
+          0.41700000000000065,
+          -0.4170000000000016,
+          0.0
+        ]
+      ],
+      "name": "Basic Wall:Foundation - Concrete (417mm):140602"
+    },
+    "2O2Fr$t4X7Zf8NOew3FK04": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FK04",
+      "elementType": "wall",
+      "storey": "T/FDN",
+      "space": "R301",
+      "orientation": "west",
+      "centroid": [
+        2.5172499999999967,
+        -10.0,
+        -0.625
+      ],
+      "bbox": [
+        [
+          0.417,
+          -10.217500000000001,
+          -1.25
+        ],
+        [
+          4.6174999999999935,
+          -9.782499999999999,
+          0.0
+        ]
+      ],
+      "name": "Basic Wall:Foundation - Concrete (435mm):140987"
+    },
+    "2O2Fr$t4X7Zf8NOew3FK3E": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FK3E",
+      "elementType": "wall",
+      "storey": "T/FDN",
+      "space": "R301",
+      "orientation": "east",
+      "centroid": [
+        6.282749999999995,
+        -7.8000000000000025,
+        -0.625
+      ],
+      "bbox": [
+        [
+          4.182499999999996,
+          -8.017500000000002,
+          -1.25
+        ],
+        [
+          8.382999999999992,
+          -7.5825000000000005,
+          0.0
+        ]
+      ],
+      "name": "Basic Wall:Foundation - Concrete (435mm):140913"
+    },
+    "2O2Fr$t4X7Zf8NOew3FK1b": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FK1b",
+      "elementType": "wall",
+      "storey": "T/FDN",
+      "space": "R301",
+      "orientation": "east",
+      "centroid": [
+        4.399999999999993,
+        -8.9,
+        -0.6885
+      ],
+      "bbox": [
+        [
+          4.182499999999994,
+          -9.782500000000015,
+          -1.25
+        ],
+        [
+          4.617499999999994,
+          -8.017499999999986,
+          -0.127
+        ]
+      ],
+      "name": "Basic Wall:Foundation - Concrete (435mm):141018"
+    },
+    "2O2Fr$t4X7Zf8NOew3FNqI": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FNqI",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        8.591500000000002,
+        -10.285500000000004,
+        1.2516666666666991
+      ],
+      "bbox": [
+        [
+          8.383,
+          -17.8,
+          0.0
+        ],
+        [
+          8.8,
+          -0.4170000000000293,
+          3.100000000000196
+        ]
+      ],
+      "name": "Basic Wall:Exterior - Brick on Block:138157"
+    },
+    "2O2Fr$t4X7Zf8NOew3FNtn": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FNtn",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        4.468989721680939,
+        -0.2085000000000001,
+        1.3566666666666995
+      ],
+      "bbox": [
+        [
+          0.0,
+          -0.41700000000000015,
+          0.0
+        ],
+        [
+          8.800000000000002,
+          -5.551115123125783e-17,
+          3.100000000000196
+        ]
+      ],
+      "name": "Basic Wall:Exterior - Brick on Block:138062"
+    },
+    "2O2Fr$t4X7Zf8NOew3FNr2": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FNr2",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        4.261499999999994,
+        -17.5915,
+        1.3566666666666995
+      ],
+      "bbox": [
+        [
+          -1.7763568394002505e-15,
+          -17.8,
+          0.0
+        ],
+        [
+          8.382999999999972,
+          -17.383,
+          3.100000000000196
+        ]
+      ],
+      "name": "Basic Wall:Exterior - Brick on Block:138237"
+    },
+    "2O2Fr$t4X7Zf8NOew3FKau": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FKau",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "R301",
+      "orientation": "east",
+      "centroid": [
+        4.399999999999999,
+        -8.900000000000006,
+        4.619500000000381
+      ],
+      "bbox": [
+        [
+          4.125000000000001,
+          -17.38299999999998,
+          3.100000000000378
+        ],
+        [
+          4.675000000000001,
+          -0.4170000000000139,
+          6.000000000000391
+        ]
+      ],
+      "name": "Basic Wall:Party Wall - CMU Residential Unit Dimising Wall:143239"
+    },
+    "2O2Fr$t4X7Zf8NOew3FLTF": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FLTF",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "B101",
+      "orientation": "south",
+      "centroid": [
+        1.6883999999999966,
+        -6.188000000000002,
+        4.2110000000001495
+      ],
+      "bbox": [
+        [
+          0.41699999999999904,
+          -6.250000000000003,
+          2.612
+        ],
+        [
+          2.506,
+          -6.126000000000002,
+          6.000000000000207
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):143856"
+    },
+    "2O2Fr$t4X7Zf8NOew3FLMr": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FLMr",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "B103",
+      "orientation": "west",
+      "centroid": [
+        3.315499999999995,
+        -6.758000000000003,
+        4.550000000000384
+      ],
+      "bbox": [
+        [
+          2.5059999999999985,
+          -6.850000000000002,
+          3.100000000000378
+        ],
+        [
+          4.124999999999991,
+          -6.666000000000003,
+          6.00000000000039
+        ]
+      ],
+      "name": "Basic Wall:Interior - Plumbing (152mm Stud):144138"
+    },
+    "2O2Fr$t4X7Zf8NOew3FKRi": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FKRi",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "R301",
+      "orientation": "west",
+      "centroid": [
+        2.5174999999999983,
+        -9.9715,
+        1.397500000000098
+      ],
+      "bbox": [
+        [
+          0.4169999999999976,
+          -10.218000000000004,
+          0.0
+        ],
+        [
+          4.6179999999999986,
+          -9.725,
+          2.795000000000196
+        ]
+      ],
+      "name": "Basic Wall:Party Wall - CMU Residential Unit Dimising Wall:139347"
+    },
+    "2O2Fr$t4X7Zf8NOew3FLIE": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FLIE",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "B101",
+      "orientation": "south",
+      "centroid": [
+        2.4439999999999995,
+        -9.200025589255297,
+        4.333000000000381
+      ],
+      "bbox": [
+        [
+          2.3819999999999997,
+          -11.674000000000005,
+          3.100000000000378
+        ],
+        [
+          2.5060000000000002,
+          -6.250000000000009,
+          6.00000000000039
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):143921"
+    },
+    "2O2Fr$t4X7Zf8NOew3FLKI": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FLKI",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "A103",
+      "orientation": "north",
+      "centroid": [
+        3.3154999999999877,
+        -11.072,
+        4.550000000000384
+      ],
+      "bbox": [
+        [
+          2.505999999999993,
+          -11.134,
+          3.100000000000378
+        ],
+        [
+          4.124999999999983,
+          -11.009999999999998,
+          6.00000000000039
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):144301"
+    },
+    "2O2Fr$t4X7Zf8NOew3FL8v": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FL8v",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "A203",
+      "orientation": "north",
+      "centroid": [
+        7.113899999999987,
+        -11.612000000000004,
+        4.211000000000198
+      ],
+      "bbox": [
+        [
+          6.2940000000000005,
+          -11.674000000000001,
+          2.612000000000196
+        ],
+        [
+          8.382999999999981,
+          -11.549999999999999,
+          6.000000000000207
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):144518"
+    },
+    "2O2Fr$t4X7Zf8NOew3FLJd": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FLJd",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "A103",
+      "orientation": "west",
+      "centroid": [
+        1.6247499999999933,
+        -11.612000000000004,
+        4.333000000000381
+      ],
+      "bbox": [
+        [
+          0.4169999999999985,
+          -11.674000000000001,
+          3.100000000000378
+        ],
+        [
+          2.381999999999991,
+          -11.549999999999999,
+          6.00000000000039
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):143960"
+    },
+    "2O2Fr$t4X7Zf8NOew3FNbT": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FNbT",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "R301",
+      "orientation": "east",
+      "centroid": [
+        6.282499999999995,
+        -7.828500000000001,
+        1.397500000000098
+      ],
+      "bbox": [
+        [
+          4.182000000000002,
+          -8.075000000000001,
+          0.0
+        ],
+        [
+          8.382999999999988,
+          -7.581999999999998,
+          2.795000000000196
+        ]
+      ],
+      "name": "Basic Wall:Party Wall - CMU Residential Unit Dimising Wall:139234"
+    },
+    "2O2Fr$t4X7Zf8NOew3FLEJ": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FLEJ",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "B103",
+      "orientation": "south",
+      "centroid": [
+        5.484499999999998,
+        -6.728000000000003,
+        4.550000000000384
+      ],
+      "bbox": [
+        [
+          4.67499999999999,
+          -6.790000000000003,
+          3.100000000000378
+        ],
+        [
+          6.294000000000007,
+          -6.666000000000002,
+          6.00000000000039
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):144684"
+    },
+    "2O2Fr$t4X7Zf8NOew3FLCm": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FLCm",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "A103",
+      "orientation": "east",
+      "centroid": [
+        5.484499999999992,
+        -11.042000000000012,
+        4.550000000000384
+      ],
+      "bbox": [
+        [
+          4.674999999999983,
+          -11.134000000000011,
+          3.100000000000378
+        ],
+        [
+          6.294000000000001,
+          -10.95000000000001,
+          6.00000000000039
+        ]
+      ],
+      "name": "Basic Wall:Interior - Plumbing (152mm Stud):144783"
+    },
+    "2O2Fr$t4X7Zf8NOew3FL9r": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FL9r",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "A101",
+      "orientation": "north",
+      "centroid": [
+        6.356000000000001,
+        -8.607692117535766,
+        4.333000000000381
+      ],
+      "bbox": [
+        [
+          6.294,
+          -11.55,
+          3.100000000000378
+        ],
+        [
+          6.418,
+          -6.126000000000005,
+          6.00000000000039
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):144586"
+    },
+    "2O2Fr$t4X7Zf8NOew3FL96": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FL96",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "B103",
+      "orientation": "east",
+      "centroid": [
+        7.155250000000004,
+        -6.188000000000002,
+        4.333000000000381
+      ],
+      "bbox": [
+        [
+          6.418000000000008,
+          -6.250000000000003,
+          3.100000000000378
+        ],
+        [
+          8.38299999999999,
+          -6.126000000000002,
+          6.00000000000039
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):144633"
+    },
+    "1hOSvn6df7F8_7GcBWlRGQ": {
+      "guid": "1hOSvn6df7F8_7GcBWlRGQ",
+      "elementType": "door",
+      "storey": "Level 1",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        8.628099999999957,
+        -16.178,
+        1.0201999999999996
+      ],
+      "bbox": [
+        [
+          8.35799999999996,
+          -16.879,
+          0.0
+        ],
+        [
+          8.82499999999996,
+          -15.476999999999999,
+          2.0860000000000003
+        ]
+      ],
+      "name": "M_Single-Flush:1250mm x 2010mm:1250mm x 2010mm:146596"
+    },
+    "2O2Fr$t4X7Zf8NOew3FKRH": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FKRH",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "R301",
+      "orientation": "north",
+      "centroid": [
+        4.4,
+        -8.899999999999984,
+        1.3975000000000983
+      ],
+      "bbox": [
+        [
+          4.124999999999997,
+          -10.0,
+          0.0
+        ],
+        [
+          4.675000000000003,
+          -7.799999999999972,
+          2.795000000000196
+        ]
+      ],
+      "name": "Basic Wall:Party Wall - CMU Residential Unit Dimising Wall:139374"
+    },
+    "1hOSvn6df7F8_7GcBWlR72": {
+      "guid": "1hOSvn6df7F8_7GcBWlR72",
+      "elementType": "window",
+      "storey": "Level 1",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        5.965500000000003,
+        -0.09514285714287816,
+        1.3099999999999972
+      ],
+      "bbox": [
+        [
+          3.548000000000011,
+          -0.4170000000000038,
+          0.10000000000001252
+        ],
+        [
+          8.383000000000008,
+          -1.1476930517062556e-14,
+          2.5200000000000076
+        ]
+      ],
+      "name": "M_Fixed:4835mm x 2420mm:4835mm x 2420mm:145788"
+    },
+    "1hOSvn6df7F8_7GcBWlRH8": {
+      "guid": "1hOSvn6df7F8_7GcBWlRH8",
+      "elementType": "door",
+      "storey": "Level 1",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        0.17190000000000996,
+        -1.6220000000000088,
+        1.0201999999999996
+      ],
+      "bbox": [
+        [
+          -0.02499999999998679,
+          -2.32300000000001,
+          0.0
+        ],
+        [
+          0.4420000000000134,
+          -0.9210000000000103,
+          2.0860000000000003
+        ]
+      ],
+      "name": "M_Single-Flush:1250mm x 2010mm:1250mm x 2010mm:146678"
+    },
+    "1hOSvn6df7F8_7GcBWlRBU": {
+      "guid": "1hOSvn6df7F8_7GcBWlRBU",
+      "elementType": "window",
+      "storey": "Level 1",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        2.83449999999999,
+        -17.704857142857126,
+        1.3099999999999972
+      ],
+      "bbox": [
+        [
+          0.41699999999999093,
+          -17.799999999999986,
+          0.10000000000001252
+        ],
+        [
+          5.251999999999987,
+          -17.382999999999996,
+          2.5200000000000076
+        ]
+      ],
+      "name": "M_Fixed:4835mm x 2420mm:4835mm x 2420mm:146016"
+    },
+    "1hOSvn6df7F8_7GcBWlRLx": {
+      "guid": "1hOSvn6df7F8_7GcBWlRLx",
+      "elementType": "window",
+      "storey": "Level 1",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        8.704857142857124,
+        -5.570000000000013,
+        1.1999999999999953
+      ],
+      "bbox": [
+        [
+          8.382999999999994,
+          -5.945000000000011,
+          0.10000000000001252
+        ],
+        [
+          8.799999999999992,
+          -5.195000000000011,
+          2.3000000000000056
+        ]
+      ],
+      "name": "M_Fixed:750mm x 2200mm:750mm x 2200mm:146885"
+    },
+    "1hOSvn6df7F8_7GcBWlSga": {
+      "guid": "1hOSvn6df7F8_7GcBWlSga",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        0.8265000000000083,
+        -0.0951428571428699,
+        3.5795000000001975
+      ],
+      "bbox": [
+        [
+          0.41700000000000953,
+          -0.4170000000000002,
+          3.200000000000214
+        ],
+        [
+          1.23600000000001,
+          -1.3739009929736312e-15,
+          3.959000000000208
+        ]
+      ],
+      "name": "M_Fixed:819mm x 759mm:819mm x 759mm:147994"
+    },
+    "1hOSvn6df7F8_7GcBWlSXO": {
+      "guid": "1hOSvn6df7F8_7GcBWlSXO",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        2.7250000000000085,
+        -0.09514285714287204,
+        4.405000000000191
+      ],
+      "bbox": [
+        [
+          1.325000000000009,
+          -0.41700000000000004,
+          3.2000000000002093
+        ],
+        [
+          4.12500000000001,
+          -4.4825254619240695e-15,
+          5.610000000000202
+        ]
+      ],
+      "name": "M_Fixed:2800mm x 2410mm:2800mm x 2410mm:147686"
+    },
+    "1hOSvn6df7F8_7GcBWlRRL": {
+      "guid": "1hOSvn6df7F8_7GcBWlRRL",
+      "elementType": "window",
+      "storey": "Level 1",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        0.09514285714286785,
+        -12.229999999999995,
+        1.1999999999999953
+      ],
+      "bbox": [
+        [
+          -7.355227538141662e-16,
+          -12.604999999999992,
+          0.10000000000001252
+        ],
+        [
+          0.4169999999999982,
+          -11.85499999999999,
+          2.3000000000000056
+        ]
+      ],
+      "name": "M_Fixed:750mm x 2200mm:750mm x 2200mm:147051"
+    },
+    "1hOSvn6df7F8_7GcBWlSp1": {
+      "guid": "1hOSvn6df7F8_7GcBWlSp1",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        0.8265000000000148,
+        -0.09536785714285859,
+        4.405000000000203
+      ],
+      "bbox": [
+        [
+          0.41700000000001597,
+          -0.4170000000000015,
+          4.025500000000201
+        ],
+        [
+          1.2360000000000149,
+          -1.3877787807814457e-15,
+          4.784500000000205
+        ]
+      ],
+      "name": "M_Casement:819mm x 759mm:819mm x 759mm:148607"
+    },
+    "1hOSvn6df7F8_7GcBWlSnC": {
+      "guid": "1hOSvn6df7F8_7GcBWlSnC",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        0.8265000000000082,
+        -0.0951428571428699,
+        5.230500000000191
+      ],
+      "bbox": [
+        [
+          0.41700000000000953,
+          -0.4170000000000002,
+          4.851000000000207
+        ],
+        [
+          1.23600000000001,
+          -1.3739009929736312e-15,
+          5.610000000000202
+        ]
+      ],
+      "name": "M_Fixed:819mm x 759mm:819mm x 759mm:148722"
+    },
+    "1hOSvn6df7F8_7GcBWlS2V": {
+      "guid": "1hOSvn6df7F8_7GcBWlS2V",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        7.973499999999965,
+        -17.70485714285713,
+        3.5795000000001975
+      ],
+      "bbox": [
+        [
+          7.5639999999999645,
+          -17.799999999999997,
+          3.200000000000214
+        ],
+        [
+          8.382999999999965,
+          -17.383,
+          3.959000000000208
+        ]
+      ],
+      "name": "M_Fixed:819mm x 759mm:819mm x 759mm:149537"
+    },
+    "1hOSvn6df7F8_7GcBWlS_W": {
+      "guid": "1hOSvn6df7F8_7GcBWlS_W",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        6.074999999999962,
+        -17.70485714285713,
+        4.405000000000198
+      ],
+      "bbox": [
+        [
+          4.674999999999963,
+          -17.799999999999997,
+          3.200000000000214
+        ],
+        [
+          7.474999999999964,
+          -17.383000000000003,
+          5.6100000000002055
+        ]
+      ],
+      "name": "M_Fixed:2800mm x 2410mm:2800mm x 2410mm:149278"
+    },
+    "1hOSvn6df7F8_7GcBWlS9F": {
+      "guid": "1hOSvn6df7F8_7GcBWlS9F",
+      "elementType": "door",
+      "storey": "Level 1",
+      "space": "B204",
+      "orientation": "west",
+      "centroid": [
+        2.519299999999993,
+        -8.129999999999976,
+        1.0312000000000001
+      ],
+      "bbox": [
+        [
+          2.4249999999999927,
+          -8.586999999999982,
+          0.0
+        ],
+        [
+          2.598999999999987,
+          -7.672999999999981,
+          2.108
+        ]
+      ],
+      "name": "M_Single-Flush:0762 x 2032mm:0762 x 2032mm:150257"
+    },
+    "1hOSvn6df7F8_7GcBWlS8Z": {
+      "guid": "1hOSvn6df7F8_7GcBWlS8Z",
+      "elementType": "door",
+      "storey": "Level 1",
+      "space": "A204",
+      "orientation": "east",
+      "centroid": [
+        6.2807000000000075,
+        -9.672000000000018,
+        1.0312000000000001
+      ],
+      "bbox": [
+        [
+          6.201000000000016,
+          -10.129000000000024,
+          0.0
+        ],
+        [
+          6.37500000000001,
+          -9.215000000000023,
+          2.108
+        ]
+      ],
+      "name": "M_Single-Flush:0762 x 2032mm:0762 x 2032mm:150173"
+    },
+    "1hOSvn6df7F8_7GcBWlS4Q": {
+      "guid": "1hOSvn6df7F8_7GcBWlS4Q",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        7.973499999999965,
+        -17.70485714285713,
+        5.230500000000194
+      ],
+      "bbox": [
+        [
+          7.5639999999999645,
+          -17.799999999999997,
+          4.85100000000021
+        ],
+        [
+          8.382999999999965,
+          -17.383,
+          5.610000000000205
+        ]
+      ],
+      "name": "M_Fixed:819mm x 759mm:819mm x 759mm:149924"
+    },
+    "1hOSvn6df7F8_7GcBWlS1M": {
+      "guid": "1hOSvn6df7F8_7GcBWlS1M",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        7.973499999999957,
+        -17.704632142857132,
+        4.405000000000203
+      ],
+      "bbox": [
+        [
+          7.5639999999999565,
+          -17.799999999999997,
+          4.025500000000202
+        ],
+        [
+          8.382999999999955,
+          -17.383,
+          4.784500000000206
+        ]
+      ],
+      "name": "M_Casement:819mm x 759mm:819mm x 759mm:149736"
+    },
+    "1hOSvn6df7F8_7GcBWlSFK": {
+      "guid": "1hOSvn6df7F8_7GcBWlSFK",
+      "elementType": "door",
+      "storey": "Level 2",
+      "space": "B101",
+      "orientation": "south",
+      "centroid": [
+        1.9152999999999962,
+        -6.180700000000004,
+        4.131200000000195
+      ],
+      "bbox": [
+        [
+          1.4072999999999949,
+          -6.275000000000012,
+          3.100000000000195
+        ],
+        [
+          2.423299999999995,
+          -6.101000000000012,
+          5.208000000000196
+        ]
+      ],
+      "name": "M_Single-Flush:0864 x 2032mm:0864 x 2032mm:150378"
+    },
+    "2OBrcmyk58NupXoVOHUuXp": {
+      "guid": "2OBrcmyk58NupXoVOHUuXp",
+      "elementType": "door",
+      "storey": "Level 2",
+      "space": "A103",
+      "orientation": "west",
+      "centroid": [
+        1.849999999999993,
+        -11.619299999999988,
+        4.131200000000378
+      ],
+      "bbox": [
+        [
+          1.3419999999999914,
+          -11.698999999999986,
+          3.100000000000378
+        ],
+        [
+          2.3579999999999917,
+          -11.524999999999991,
+          5.2080000000003785
+        ]
+      ],
+      "name": "M_Single-Flush:0864 x 2032mm:0864 x 2032mm:159734"
+    },
+    "1hOSvn6df7F8_7GcBWlSDm": {
+      "guid": "1hOSvn6df7F8_7GcBWlSDm",
+      "elementType": "door",
+      "storey": "Level 2",
+      "space": "A203",
+      "orientation": "north",
+      "centroid": [
+        6.889299999999982,
+        -11.619299999999992,
+        4.131200000000195
+      ],
+      "bbox": [
+        [
+          6.381299999999984,
+          -11.698999999999991,
+          3.100000000000196
+        ],
+        [
+          7.397299999999984,
+          -11.524999999999991,
+          5.208000000000196
+        ]
+      ],
+      "name": "M_Single-Flush:0864 x 2032mm:0864 x 2032mm:150478"
+    },
+    "2OBrcmyk58NupXoVOHUvVV": {
+      "guid": "2OBrcmyk58NupXoVOHUvVV",
+      "elementType": "door",
+      "storey": "Level 2",
+      "space": "B103",
+      "orientation": "east",
+      "centroid": [
+        6.910000000000009,
+        -6.180700000000009,
+        4.131200000000378
+      ],
+      "bbox": [
+        [
+          6.402000000000009,
+          -6.27500000000001,
+          3.100000000000378
+        ],
+        [
+          7.418000000000009,
+          -6.101000000000016,
+          5.2080000000003785
+        ]
+      ],
+      "name": "M_Single-Flush:0864 x 2032mm:0864 x 2032mm:159834"
+    },
+    "2O2Fr$t4X7Zf8NOew3FLOH": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FLOH",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        6.8790999999999745,
+        -17.59149999999999,
+        4.434000000000234
+      ],
+      "bbox": [
+        [
+          0.0,
+          -17.800000000000004,
+          3.100000000000378
+        ],
+        [
+          8.799999999999974,
+          -17.383,
+          6.00000000000039
+        ]
+      ],
+      "name": "Basic Wall:Exterior - Brick on Block:143534"
+    },
+    "2OBrcmyk58NupXoVOHUvR4": {
+      "guid": "2OBrcmyk58NupXoVOHUvR4",
+      "elementType": "door",
+      "storey": "Level 2",
+      "space": "B101",
+      "orientation": "south",
+      "centroid": [
+        2.4512999999999914,
+        -9.438051178510594,
+        4.131200000000378
+      ],
+      "bbox": [
+        [
+          2.3569999999999878,
+          -9.94605117851059,
+          3.100000000000378
+        ],
+        [
+          2.530999999999988,
+          -8.93005117851059,
+          5.2080000000003785
+        ]
+      ],
+      "name": "M_Single-Flush:0864 x 2032mm:0864 x 2032mm:160065"
+    },
+    "2OBrcmyk58NupXoVOHUvPL": {
+      "guid": "2OBrcmyk58NupXoVOHUvPL",
+      "elementType": "door",
+      "storey": "Level 2",
+      "space": "A101",
+      "orientation": "north",
+      "centroid": [
+        6.348700000000009,
+        -8.377384235071528,
+        4.131200000000378
+      ],
+      "bbox": [
+        [
+          6.269000000000013,
+          -8.885384235071529,
+          3.100000000000378
+        ],
+        [
+          6.443000000000012,
+          -7.869384235071529,
+          5.2080000000003785
+        ]
+      ],
+      "name": "M_Single-Flush:0864 x 2032mm:0864 x 2032mm:160208"
+    },
+    "1s1jVhK8z0pgKYcr9jt7AB": {
+      "guid": "1s1jVhK8z0pgKYcr9jt7AB",
+      "elementType": "door",
+      "storey": "Level 1",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        5.758499999999993,
+        -17.669942857142882,
+        1.2208571428571429
+      ],
+      "bbox": [
+        [
+          5.2759999999999945,
+          -17.82500000000004,
+          0.0
+        ],
+        [
+          6.240999999999994,
+          -17.358000000000004,
+          2.496
+        ]
+      ],
+      "name": "M_Single-Glass 1:0813 x 2420mm:0813 x 2420mm:171975"
+    },
+    "1s1jVhK8z0pgKYcr9jt781": {
+      "guid": "1s1jVhK8z0pgKYcr9jt781",
+      "elementType": "door",
+      "storey": "Level 1",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        3.0414691650428147,
+        -0.13005714285711398,
+        1.2208571428571429
+      ],
+      "bbox": [
+        [
+          2.558969165042815,
+          -0.44199999999998824,
+          0.0
+        ],
+        [
+          3.5239691650428147,
+          0.025000000000047873,
+          2.496
+        ]
+      ],
+      "name": "M_Single-Glass 1:0813 x 2420mm:0813 x 2420mm:171853"
+    },
+    "1l0GAJtRTFv8$zmKJOH4$e": {
+      "guid": "1l0GAJtRTFv8$zmKJOH4$e",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        0.09514285714286663,
+        -15.982999999999965,
+        4.405000000000191
+      ],
+      "bbox": [
+        [
+          -9.575673587391975e-16,
+          -17.38299999999996,
+          3.2000000000002093
+        ],
+        [
+          0.4169999999999946,
+          -14.582999999999961,
+          5.610000000000202
+        ]
+      ],
+      "name": "M_Fixed:2800mm x 2410mm:2800mm x 2410mm:180318"
+    },
+    "1l0GAJtRTFv8$zmKJOH4oq": {
+      "guid": "1l0GAJtRTFv8$zmKJOH4oq",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        0.09536785714285637,
+        -14.073499999999957,
+        4.405000000000203
+      ],
+      "bbox": [
+        [
+          -8.326672684688674e-16,
+          -14.482999999999953,
+          4.025500000000202
+        ],
+        [
+          0.41699999999999926,
+          -13.663999999999954,
+          4.784500000000206
+        ]
+      ],
+      "name": "M_Casement:819mm x 759mm:819mm x 759mm:180994"
+    },
+    "1l0GAJtRTFv8$zmKJOH4u1": {
+      "guid": "1l0GAJtRTFv8$zmKJOH4u1",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        0.09514285714286773,
+        -14.073499999999957,
+        5.230500000000194
+      ],
+      "bbox": [
+        [
+          -8.465450562766819e-16,
+          -14.48299999999996,
+          4.85100000000021
+        ],
+        [
+          0.416999999999998,
+          -13.663999999999959,
+          5.610000000000205
+        ]
+      ],
+      "name": "M_Fixed:819mm x 759mm:819mm x 759mm:180663"
+    },
+    "1l0GAJtRTFv8$zmKJOH4qs": {
+      "guid": "1l0GAJtRTFv8$zmKJOH4qs",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        0.09514285714286773,
+        -14.073499999999957,
+        3.5795000000001935
+      ],
+      "bbox": [
+        [
+          -8.465450562766819e-16,
+          -14.48299999999996,
+          3.200000000000209
+        ],
+        [
+          0.416999999999998,
+          -13.663999999999959,
+          3.959000000000203
+        ]
+      ],
+      "name": "M_Fixed:819mm x 759mm:819mm x 759mm:180864"
+    },
+    "2O2Fr$t4X7Zf8NOew3FLQD": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FLQD",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        1.9209000000000038,
+        -0.20850000000000035,
+        4.434000000000234
+      ],
+      "bbox": [
+        [
+          0.0,
+          -0.4170000000000015,
+          3.100000000000378
+        ],
+        [
+          8.8,
+          5.551115123125783e-17,
+          6.00000000000039
+        ]
+      ],
+      "name": "Basic Wall:Exterior - Brick on Block:143410"
+    },
+    "1l0GAJtRTFv8$zmKJOH4kJ": {
+      "guid": "1l0GAJtRTFv8$zmKJOH4kJ",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        8.704857142857126,
+        -3.726500000000037,
+        5.230500000000194
+      ],
+      "bbox": [
+        [
+          8.382999999999996,
+          -4.1360000000000365,
+          4.85100000000021
+        ],
+        [
+          8.799999999999994,
+          -3.317000000000036,
+          5.610000000000205
+        ]
+      ],
+      "name": "M_Fixed:819mm x 759mm:819mm x 759mm:181285"
+    },
+    "1l0GAJtRTFv8$zmKJOH4pU": {
+      "guid": "1l0GAJtRTFv8$zmKJOH4pU",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        8.704857142857128,
+        -1.817000000000035,
+        4.405000000000191
+      ],
+      "bbox": [
+        [
+          8.383000000000004,
+          -3.217000000000036,
+          3.2000000000002093
+        ],
+        [
+          8.8,
+          -0.41700000000003556,
+          5.610000000000202
+        ]
+      ],
+      "name": "M_Fixed:2800mm x 2410mm:2800mm x 2410mm:181096"
+    },
+    "0jf0rYHfX3RAB3bSIRjmmy": {
+      "guid": "0jf0rYHfX3RAB3bSIRjmmy",
+      "elementType": "wall",
+      "storey": "Roof",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        4.400000000000001,
+        -0.20850000000000013,
+        6.3045
+      ],
+      "bbox": [
+        [
+          0.0,
+          -0.41700000000000015,
+          6.0
+        ],
+        [
+          8.800000000000002,
+          -5.551115123125783e-17,
+          6.609
+        ]
+      ],
+      "name": "Basic Wall:Exterior - Brick on Block:184944"
+    },
+    "0jf0rYHfX3RAB3bSIRjmoa": {
+      "guid": "0jf0rYHfX3RAB3bSIRjmoa",
+      "elementType": "wall",
+      "storey": "Roof",
+      "space": null,
+      "orientation": "south",
+      "centroid": [
+        4.191499999999986,
+        -17.5915,
+        6.3045
+      ],
+      "bbox": [
+        [
+          -1.7763568394002505e-15,
+          -17.8,
+          6.0
+        ],
+        [
+          8.382999999999972,
+          -17.383,
+          6.609
+        ]
+      ],
+      "name": "Basic Wall:Exterior - Brick on Block:185064"
+    },
+    "0jf0rYHfX3RAB3bSIRjmpw": {
+      "guid": "0jf0rYHfX3RAB3bSIRjmpw",
+      "elementType": "wall",
+      "storey": "Roof",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        8.591499999999998,
+        -9.108500000000015,
+        6.3045
+      ],
+      "bbox": [
+        [
+          8.383,
+          -17.8,
+          6.0
+        ],
+        [
+          8.8,
+          -0.4170000000000293,
+          6.609
+        ]
+      ],
+      "name": "Basic Wall:Exterior - Brick on Block:185014"
+    },
+    "1l0GAJtRTFv8$zmKJOH4gQ": {
+      "guid": "1l0GAJtRTFv8$zmKJOH4gQ",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        8.70463214285714,
+        -3.726500000000042,
+        4.405000000000203
+      ],
+      "bbox": [
+        [
+          8.382999999999994,
+          -4.136000000000042,
+          4.025500000000202
+        ],
+        [
+          8.799999999999994,
+          -3.317000000000043,
+          4.784500000000206
+        ]
+      ],
+      "name": "M_Casement:819mm x 759mm:819mm x 759mm:181548"
+    },
+    "0jf0rYHfX3RAB3bSIRjmr1": {
+      "guid": "0jf0rYHfX3RAB3bSIRjmr1",
+      "elementType": "wall",
+      "storey": "Roof",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        0.20849999999999896,
+        -8.899999999999984,
+        6.3045
+      ],
+      "bbox": [
+        [
+          -1.0547118733938987e-15,
+          -17.382999999999967,
+          6.0
+        ],
+        [
+          0.41699999999999904,
+          -0.41699999999999804,
+          6.609
+        ]
+      ],
+      "name": "Basic Wall:Exterior - Brick on Block:185101"
+    },
+    "0iEHWY1$XA8eQeeULq4jpl": {
+      "guid": "0iEHWY1$XA8eQeeULq4jpl",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "B204",
+      "orientation": "north",
+      "centroid": [
+        3.3020000000000023,
+        -7.4919999999999725,
+        1.397500000000098
+      ],
+      "bbox": [
+        [
+          2.5740000000000007,
+          -7.553999999999974,
+          0.0
+        ],
+        [
+          4.030000000000003,
+          -7.429999999999973,
+          2.795000000000196
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):190140"
+    },
+    "0iEHWY1$XA8eQeeULq4j_U": {
+      "guid": "0iEHWY1$XA8eQeeULq4j_U",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "R301",
+      "orientation": "west",
+      "centroid": [
+        4.105999999999999,
+        -8.653499999999994,
+        1.550000000000098
+      ],
+      "bbox": [
+        [
+          4.029999999999999,
+          -9.725000000000014,
+          0.0
+        ],
+        [
+          4.181999999999999,
+          -7.581999999999972,
+          3.100000000000196
+        ]
+      ],
+      "name": "Basic Wall:Interior - Furring (152 mm Stud):189901"
+    },
+    "0iEHWY1$XA8eQeeULq4jE6": {
+      "guid": "0iEHWY1$XA8eQeeULq4jE6",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "B205",
+      "orientation": "west",
+      "centroid": [
+        2.517499999999999,
+        -10.294000000000002,
+        1.397500000000098
+      ],
+      "bbox": [
+        [
+          0.4169999999999992,
+          -10.370000000000001,
+          0.0
+        ],
+        [
+          4.6179999999999986,
+          -10.218,
+          2.795000000000196
+        ]
+      ],
+      "name": "Basic Wall:Interior - Furring (152 mm Stud):190933"
+    },
+    "0iEHWY1$XA8eQeeULq4jDb": {
+      "guid": "0iEHWY1$XA8eQeeULq4jDb",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "R301",
+      "orientation": "south",
+      "centroid": [
+        4.694000000000003,
+        -9.222500000000004,
+        1.397500000000098
+      ],
+      "bbox": [
+        [
+          4.618000000000003,
+          -10.370000000000017,
+          0.0
+        ],
+        [
+          4.770000000000002,
+          -8.07499999999999,
+          2.795000000000196
+        ]
+      ],
+      "name": "Basic Wall:Interior - Furring (152 mm Stud):190774"
+    },
+    "1l0GAJtRTFv8$zmKJOH4aS": {
+      "guid": "1l0GAJtRTFv8$zmKJOH4aS",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        8.704857142857113,
+        -12.149000000000004,
+        4.300000000000194
+      ],
+      "bbox": [
+        [
+          8.382999999999983,
+          -12.52400000000001,
+          3.200000000000209
+        ],
+        [
+          8.799999999999981,
+          -11.774000000000008,
+          5.400000000000201
+        ]
+      ],
+      "name": "M_Fixed:750mm x 2200mm:750mm x 2200mm:181930"
+    },
+    "0dxE1Sy6nDqfpDb5vIMNiA": {
+      "guid": "0dxE1Sy6nDqfpDb5vIMNiA",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "R301",
+      "orientation": "east",
+      "centroid": [
+        4.693999999999988,
+        -8.870000000000006,
+        4.3975000000003845
+      ],
+      "bbox": [
+        [
+          4.61799999999999,
+          -10.95000000000001,
+          3.100000000000378
+        ],
+        [
+          4.769999999999989,
+          -6.790000000000003,
+          5.69500000000039
+        ]
+      ],
+      "name": "Basic Wall:Interior - Furring (152 mm Stud):193247"
+    },
+    "0dxE1Sy6nDqfpDb5vIMN_Z": {
+      "guid": "0dxE1Sy6nDqfpDb5vIMN_Z",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "R301",
+      "orientation": "west",
+      "centroid": [
+        4.105999999999982,
+        -8.930000000000001,
+        4.3975000000003845
+      ],
+      "bbox": [
+        [
+          4.0299999999999825,
+          -11.01,
+          3.100000000000378
+        ],
+        [
+          4.181999999999982,
+          -6.850000000000004,
+          5.69500000000039
+        ]
+      ],
+      "name": "Basic Wall:Interior - Furring (152 mm Stud):194166"
+    },
+    "1l0GAJtRTFv8$zmKJOH4hv": {
+      "guid": "1l0GAJtRTFv8$zmKJOH4hv",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        8.704857142857126,
+        -3.726500000000037,
+        3.5795000000001935
+      ],
+      "bbox": [
+        [
+          8.382999999999996,
+          -4.1360000000000365,
+          3.200000000000209
+        ],
+        [
+          8.799999999999994,
+          -3.317000000000036,
+          3.959000000000203
+        ]
+      ],
+      "name": "M_Fixed:819mm x 759mm:819mm x 759mm:181583"
+    },
+    "0iEHWY1$XA8eQeeULq4jZ1": {
+      "guid": "0iEHWY1$XA8eQeeULq4jZ1",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "A205",
+      "orientation": "east",
+      "centroid": [
+        6.206499999999996,
+        -7.506000000000004,
+        1.397500000000098
+      ],
+      "bbox": [
+        [
+          4.030000000000003,
+          -7.5820000000000025,
+          0.0
+        ],
+        [
+          8.382999999999988,
+          -7.430000000000003,
+          2.795000000000196
+        ]
+      ],
+      "name": "Basic Wall:Interior - Furring (152 mm Stud):189074"
+    },
+    "1l0GAJtRTFv8$zmKJOH4ZZ": {
+      "guid": "1l0GAJtRTFv8$zmKJOH4ZZ",
+      "elementType": "window",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        0.09514285714286823,
+        -5.650999999999987,
+        4.300000000000194
+      ],
+      "bbox": [
+        [
+          -3.469446951953614e-16,
+          -6.025999999999988,
+          3.200000000000209
+        ],
+        [
+          0.4169999999999986,
+          -5.275999999999988,
+          5.400000000000201
+        ]
+      ],
+      "name": "M_Fixed:750mm x 2200mm:750mm x 2200mm:182101"
+    },
+    "1aj$VJZFn2TxepZUBcKpee": {
+      "guid": "1aj$VJZFn2TxepZUBcKpee",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "B101",
+      "orientation": "south",
+      "centroid": [
+        1.4934000000000078,
+        -7.987500000000007,
+        2.8560000000000976
+      ],
+      "bbox": [
+        [
+          1.431400000000008,
+          -9.725000000000007,
+          2.612
+        ],
+        [
+          1.555400000000008,
+          -6.250000000000005,
+          3.1000000000001955
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):204300"
+    },
+    "3Y4YRln2r91vflHcHE5IVS": {
+      "guid": "3Y4YRln2r91vflHcHE5IVS",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "B103",
+      "orientation": "east",
+      "centroid": [
+        7.382000000000032,
+        -6.567450000000052,
+        5.856000000000385
+      ],
+      "bbox": [
+        [
+          6.84045000000003,
+          -6.5944500000000525,
+          5.712000000000378
+        ],
+        [
+          7.923550000000031,
+          -6.540450000000052,
+          6.000000000000391
+        ]
+      ],
+      "name": "Basic Wall:Interior - Furring (38 mm Stud):217414"
+    },
+    "1aj$VJZFn2TxepZUBcKphf": {
+      "guid": "1aj$VJZFn2TxepZUBcKphf",
+      "elementType": "wall",
+      "storey": "Level 1",
+      "space": "A101",
+      "orientation": "north",
+      "centroid": [
+        7.306599999999957,
+        -9.8125,
+        2.8560000000000976
+      ],
+      "bbox": [
+        [
+          7.244599999999956,
+          -11.55,
+          2.612
+        ],
+        [
+          7.368599999999956,
+          -8.075,
+          3.1000000000001955
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):204493"
+    },
+    "3Y4YRln2r91vflHcHE5IVT": {
+      "guid": "3Y4YRln2r91vflHcHE5IVT",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "B103",
+      "orientation": "east",
+      "centroid": [
+        6.867450000000032,
+        -7.16200000000003,
+        5.856000000000385
+      ],
+      "bbox": [
+        [
+          6.840450000000031,
+          -7.729550000000008,
+          5.712000000000378
+        ],
+        [
+          6.894450000000031,
+          -6.594450000000051,
+          6.000000000000391
+        ]
+      ],
+      "name": "Basic Wall:Interior - Furring (38 mm Stud):217415"
+    },
+    "3Y4YRln2r91vflHcHE5IVI": {
+      "guid": "3Y4YRln2r91vflHcHE5IVI",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "A201",
+      "orientation": "north",
+      "centroid": [
+        7.436000000000029,
+        -7.702550000000009,
+        5.856000000000385
+      ],
+      "bbox": [
+        [
+          6.89445000000003,
+          -7.7295500000000095,
+          5.712000000000378
+        ],
+        [
+          7.977550000000031,
+          -7.675550000000009,
+          6.000000000000391
+        ]
+      ],
+      "name": "Basic Wall:Interior - Furring (38 mm Stud):217416"
+    },
+    "1aj$VJZFn2TxepZUBcKpvt": {
+      "guid": "1aj$VJZFn2TxepZUBcKpvt",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "R301",
+      "orientation": "south",
+      "centroid": [
+        3.0874999999999924,
+        -10.032051178510592,
+        4.333000000000381
+      ],
+      "bbox": [
+        [
+          2.505999999999993,
+          -10.094051178510592,
+          3.100000000000378
+        ],
+        [
+          4.029999999999983,
+          -9.97005117851059,
+          6.00000000000039
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):203347"
+    },
+    "3Y4YRln2r91vflHcHE5IVJ": {
+      "guid": "3Y4YRln2r91vflHcHE5IVJ",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "B103",
+      "orientation": "east",
+      "centroid": [
+        7.950550000000029,
+        -7.10800000000003,
+        5.856000000000385
+      ],
+      "bbox": [
+        [
+          7.92355000000003,
+          -7.675550000000011,
+          5.712000000000378
+        ],
+        [
+          7.97755000000003,
+          -6.540450000000051,
+          6.000000000000391
+        ]
+      ],
+      "name": "Basic Wall:Interior - Furring (38 mm Stud):217417"
+    },
+    "1aj$VJZFn2TxepZUBcKpac": {
+      "guid": "1aj$VJZFn2TxepZUBcKpac",
+      "elementType": "door",
+      "storey": "Level 2",
+      "space": "R301",
+      "orientation": "east",
+      "centroid": [
+        5.912375000000004,
+        -7.776084235071525,
+        4.131200000000378
+      ],
+      "bbox": [
+        [
+          5.4553750000000045,
+          -7.8703842350715325,
+          3.100000000000378
+        ],
+        [
+          6.369375000000005,
+          -7.696384235071532,
+          5.2080000000003785
+        ]
+      ],
+      "name": "M_Single-Flush:0762 x 2032mm:0762 x 2032mm:204034"
+    },
+    "1aj$VJZFn2TxepZUBcKpZw": {
+      "guid": "1aj$VJZFn2TxepZUBcKpZw",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "R301",
+      "orientation": "east",
+      "centroid": [
+        5.7221875,
+        -7.783384235071523,
+        4.333000000000381
+      ],
+      "bbox": [
+        [
+          4.769999999999988,
+          -7.845384235071523,
+          3.100000000000378
+        ],
+        [
+          6.294000000000007,
+          -7.721384235071523,
+          6.00000000000039
+        ]
+      ],
+      "name": "Basic Wall:Interior - Partition (92mm Stud):203998"
+    },
+    "2O2Fr$t4X7Zf8NOew3FLPP": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FLPP",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        0.20849999999999788,
+        -12.125749999999973,
+        4.411666666666893
+      ],
+      "bbox": [
+        [
+          -5.495603971894525e-15,
+          -17.79999999999997,
+          3.100000000000378
+        ],
+        [
+          0.41699999999999926,
+          0.0,
+          6.000000000000391
+        ]
+      ],
+      "name": "Basic Wall:Exterior - Brick on Block:143590"
+    },
+    "3Y4YRln2r91vflHcHE5ITn": {
+      "guid": "3Y4YRln2r91vflHcHE5ITn",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "A103",
+      "orientation": "west",
+      "centroid": [
+        1.4030000000000262,
+        -11.232550000000002,
+        5.856000000000385
+      ],
+      "bbox": [
+        [
+          0.8614500000000263,
+          -11.25955,
+          5.712000000000378
+        ],
+        [
+          1.9445500000000262,
+          -11.205549999999999,
+          6.000000000000391
+        ]
+      ],
+      "name": "Basic Wall:Interior - Furring (38 mm Stud):217579"
+    },
+    "1aj$VJZFn2TxepZUBcKp$i": {
+      "guid": "1aj$VJZFn2TxepZUBcKp$i",
+      "elementType": "door",
+      "storey": "Level 2",
+      "space": "R301",
+      "orientation": "west",
+      "centroid": [
+        2.9069999999999965,
+        -10.039351178510591,
+        4.131200000000378
+      ],
+      "bbox": [
+        [
+          2.4499999999999966,
+          -10.119051178510585,
+          3.100000000000378
+        ],
+        [
+          3.363999999999997,
+          -9.945051178510585,
+          5.2080000000003785
+        ]
+      ],
+      "name": "M_Single-Flush:0762 x 2032mm:0762 x 2032mm:203720"
+    },
+    "3Y4YRln2r91vflHcHE5ITm": {
+      "guid": "3Y4YRln2r91vflHcHE5ITm",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "A103",
+      "orientation": "west",
+      "centroid": [
+        0.8344500000000257,
+        -10.692000000000021,
+        5.856000000000385
+      ],
+      "bbox": [
+        [
+          0.8074500000000259,
+          -11.25955,
+          5.712000000000378
+        ],
+        [
+          0.8614500000000257,
+          -10.124450000000044,
+          6.000000000000391
+        ]
+      ],
+      "name": "Basic Wall:Interior - Furring (38 mm Stud):217578"
+    },
+    "1Eo2$BaHX42AEkDvQQDocD": {
+      "guid": "1Eo2$BaHX42AEkDvQQDocD",
+      "elementType": "window",
+      "storey": "Roof",
+      "space": "A103",
+      "orientation": "west",
+      "centroid": [
+        1.376000000000014,
+        -10.665,
+        6.581021817692593
+      ],
+      "bbox": [
+        [
+          0.7897311585167204,
+          -11.277268841483306,
+          6.456999999999818
+        ],
+        [
+          1.9622688414833074,
+          -10.052731158516682,
+          6.634799999999817
+        ]
+      ],
+      "name": "M_Skylight:1180 x 1170mm:1180 x 1170mm:185337"
+    },
+    "1Eo2$BaHX42AEkDvQQDoy2": {
+      "guid": "1Eo2$BaHX42AEkDvQQDoy2",
+      "elementType": "window",
+      "storey": "Roof",
+      "space": "B103",
+      "orientation": "east",
+      "centroid": [
+        7.4090000000000185,
+        -7.135000000000003,
+        6.581021817692593
+      ],
+      "bbox": [
+        [
+          6.822731158516726,
+          -7.747268841483314,
+          6.456999999999818
+        ],
+        [
+          7.995268841483313,
+          -6.522731158516691,
+          6.634799999999817
+        ]
+      ],
+      "name": "M_Skylight:1180 x 1170mm:1180 x 1170mm:185718"
+    },
+    "3Y4YRln2r91vflHcHE5ITp": {
+      "guid": "3Y4YRln2r91vflHcHE5ITp",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "B201",
+      "orientation": "south",
+      "centroid": [
+        1.349000000000026,
+        -10.09745000000004,
+        5.856000000000385
+      ],
+      "bbox": [
+        [
+          0.8074500000000258,
+          -10.12445000000004,
+          5.712000000000378
+        ],
+        [
+          1.890550000000026,
+          -10.070450000000038,
+          6.000000000000391
+        ]
+      ],
+      "name": "Basic Wall:Interior - Furring (38 mm Stud):217577"
+    },
+    "2O2Fr$t4X7Zf8NOew3FLR9": {
+      "guid": "2O2Fr$t4X7Zf8NOew3FLR9",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": null,
+      "orientation": "east",
+      "centroid": [
+        8.591499999999996,
+        -5.674250000000016,
+        4.411666666666893
+      ],
+      "bbox": [
+        [
+          8.382999999999983,
+          -17.79999999999997,
+          3.100000000000378
+        ],
+        [
+          8.800000000000004,
+          0.0,
+          6.00000000000039
+        ]
+      ],
+      "name": "Basic Wall:Exterior - Brick on Block:143478"
+    },
+    "3Y4YRln2r91vflHcHE5ITs": {
+      "guid": "3Y4YRln2r91vflHcHE5ITs",
+      "elementType": "wall",
+      "storey": "Level 2",
+      "space": "A103",
+      "orientation": "west",
+      "centroid": [
+        1.9175500000000247,
+        -10.63800000000002,
+        5.856000000000385
+      ],
+      "bbox": [
+        [
+          1.8905500000000248,
+          -11.205549999999999,
+          5.712000000000378
+        ],
+        [
+          1.944550000000025,
+          -10.07045000000004,
+          6.000000000000391
+        ]
+      ],
+      "name": "Basic Wall:Interior - Furring (38 mm Stud):217580"
+    },
+    "0BTBFw6f90Nfh9rP1dl_3S": {
+      "guid": "0BTBFw6f90Nfh9rP1dl_3S",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        5.478499999999995,
+        -6.314999999999991,
+        1.3065000000000004
+      ],
+      "bbox": [
+        [
+          2.5740000000000025,
+          -7.429999999999982,
+          0.01299999999999975
+        ],
+        [
+          8.382999999999988,
+          -5.200000000000001,
+          2.600000000000001
+        ]
+      ],
+      "space": "B103",
+      "orientation": null,
+      "name": "B103"
+    },
+    "0BTBFw6f90Nfh9rP1dlXr2": {
+      "guid": "0BTBFw6f90Nfh9rP1dlXr2",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        3.3084999999999987,
+        -14.991499999999991,
+        1.3095
+      ],
+      "bbox": [
+        [
+          0.41700000000000026,
+          -17.38299999999999,
+          0.01900000000000001
+        ],
+        [
+          6.199999999999996,
+          -12.6,
+          2.6
+        ]
+      ],
+      "space": "A102",
+      "orientation": null,
+      "name": "A102"
+    },
+    "0BTBFw6f90Nfh9rP1dlXr$": {
+      "guid": "0BTBFw6f90Nfh9rP1dlXr$",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        3.3215000000000003,
+        -11.48500000000001,
+        1.3065000000000004
+      ],
+      "bbox": [
+        [
+          0.4170000000000007,
+          -12.600000000000001,
+          0.01299999999999975
+        ],
+        [
+          6.226,
+          -10.370000000000019,
+          2.600000000000001
+        ]
+      ],
+      "space": "A103",
+      "orientation": null,
+      "name": "A103"
+    },
+    "0BTBFw6f90Nfh9rP1dl_CZ": {
+      "guid": "0BTBFw6f90Nfh9rP1dl_CZ",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        5.491499999999995,
+        -2.8085000000000133,
+        1.3095
+      ],
+      "bbox": [
+        [
+          2.5999999999999948,
+          -5.200000000000011,
+          0.01900000000000001
+        ],
+        [
+          8.382999999999996,
+          -0.41700000000001625,
+          2.6
+        ]
+      ],
+      "space": "B102",
+      "orientation": null,
+      "name": "B102"
+    },
+    "0BTBFw6f90Nfh9rP1dlXru": {
+      "guid": "0BTBFw6f90Nfh9rP1dlXru",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        5.498000000000002,
+        -9.160500000000008,
+        1.3065000000000004
+      ],
+      "bbox": [
+        [
+          4.770000000000002,
+          -10.246000000000024,
+          0.01299999999999975
+        ],
+        [
+          6.226000000000002,
+          -8.074999999999992,
+          2.600000000000001
+        ]
+      ],
+      "space": "A104",
+      "orientation": null,
+      "name": "A104"
+    },
+    "0BTBFw6f90Nfh9rP1dlXre": {
+      "guid": "0BTBFw6f90Nfh9rP1dlXre",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        5.531999999999994,
+        -9.397692117535767,
+        4.406500000000287
+      ],
+      "bbox": [
+        [
+          4.7699999999999845,
+          -10.950000000000008,
+          3.113000000000196
+        ],
+        [
+          6.294000000000003,
+          -7.845384235071526,
+          5.700000000000379
+        ]
+      ],
+      "space": "A204",
+      "orientation": null,
+      "name": "A204"
+    },
+    "0BTBFw6f90Nfh9rP1dlXrc": {
+      "guid": "0BTBFw6f90Nfh9rP1dlXrc",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        6.357555555555556,
+        -5.0373333333333425,
+        4.409500000000288
+      ],
+      "bbox": [
+        [
+          4.67499999999999,
+          -6.666000000000009,
+          3.119000000000196
+        ],
+        [
+          8.383000000000001,
+          -0.4170000000000158,
+          5.700000000000379
+        ]
+      ],
+      "space": "A202",
+      "orientation": null,
+      "name": "A202"
+    },
+    "0BTBFw6f90Nfh9rP1dl_3P": {
+      "guid": "0BTBFw6f90Nfh9rP1dl_3P",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        3.3019999999999996,
+        -8.63949999999999,
+        1.3065000000000004
+      ],
+      "bbox": [
+        [
+          2.573999999999999,
+          -9.725000000000012,
+          0.01299999999999984
+        ],
+        [
+          4.030000000000001,
+          -7.553999999999968,
+          2.600000000000001
+        ]
+      ],
+      "space": "B104",
+      "orientation": null,
+      "name": "B104"
+    },
+    "0BTBFw6f90Nfh9rP1dl_3C": {
+      "guid": "0BTBFw6f90Nfh9rP1dl_3C",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        3.2679999999999914,
+        -8.410025589255298,
+        4.406500000000287
+      ],
+      "bbox": [
+        [
+          2.505999999999996,
+          -9.970051178510587,
+          3.113000000000196
+        ],
+        [
+          4.029999999999986,
+          -6.850000000000005,
+          5.700000000000379
+        ]
+      ],
+      "space": "B204",
+      "orientation": null,
+      "name": "B204"
+    },
+    "0BTBFw6f90Nfh9rP1dlXrb": {
+      "guid": "0BTBFw6f90Nfh9rP1dlXrb",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        6.454519999999984,
+        -12.653800000000002,
+        4.40950000000029
+      ],
+      "bbox": [
+        [
+          4.674999999999977,
+          -17.382999999999996,
+          3.1190000000001965
+        ],
+        [
+          8.38299999999999,
+          -11.134000000000013,
+          5.700000000000379
+        ]
+      ],
+      "space": "A203",
+      "orientation": null,
+      "name": "A203"
+    },
+    "2gRXFgjRn2HPE$YoDLX3FV": {
+      "guid": "2gRXFgjRn2HPE$YoDLX3FV",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        5.531999999999997,
+        -7.255692117535766,
+        4.406500000000287
+      ],
+      "bbox": [
+        [
+          4.769999999999988,
+          -7.721384235071525,
+          3.113000000000196
+        ],
+        [
+          6.294000000000007,
+          -6.790000000000006,
+          5.700000000000379
+        ]
+      ],
+      "space": "A205",
+      "orientation": null,
+      "name": "A205"
+    },
+    "10mjSDZJj9gPS2PrQaxa4o": {
+      "guid": "10mjSDZJj9gPS2PrQaxa4o",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        0.9242000000000008,
+        -7.914749999999994,
+        2.816625000000098
+      ],
+      "bbox": [
+        [
+          0.4169999999999997,
+          -9.725000000000003,
+          0.018999999999999684
+        ],
+        [
+          1.4314000000000018,
+          -5.974999999999971,
+          5.7000000000001965
+        ]
+      ],
+      "space": "B105",
+      "orientation": null,
+      "name": "B105"
+    },
+    "0BTBFw6f90Nfh9rP1dl_3Q": {
+      "guid": "0BTBFw6f90Nfh9rP1dl_3Q",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        2.1138,
+        -5.833466316001321,
+        1.3094999999999999
+      ],
+      "bbox": [
+        [
+          0.4169999999999998,
+          -9.72500000000001,
+          0.01900000000000001
+        ],
+        [
+          2.5999999999999943,
+          -0.4170000000000025,
+          2.6
+        ]
+      ],
+      "space": "B101",
+      "orientation": null,
+      "name": "B101"
+    },
+    "2gRXFgjRn2HPE$YoDLX3FC": {
+      "guid": "2gRXFgjRn2HPE$YoDLX3FC",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        3.267999999999988,
+        -10.552025589255289,
+        4.406500000000287
+      ],
+      "bbox": [
+        [
+          2.5059999999999927,
+          -11.009999999999994,
+          3.113000000000196
+        ],
+        [
+          4.0299999999999825,
+          -10.094051178510586,
+          5.700000000000379
+        ]
+      ],
+      "space": "B205",
+      "orientation": null,
+      "name": "B205"
+    },
+    "0BTBFw6f90Nfh9rP1dlXrr": {
+      "guid": "0BTBFw6f90Nfh9rP1dlXrr",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        6.686199999999995,
+        -11.966889400000008,
+        1.3094999999999999
+      ],
+      "bbox": [
+        [
+          6.2000000000000055,
+          -17.382999999999996,
+          0.01900000000000001
+        ],
+        [
+          8.382999999999994,
+          -8.074999999999998,
+          2.6
+        ]
+      ],
+      "space": "A101",
+      "orientation": null,
+      "name": "A101"
+    },
+    "0BTBFw6f90Nfh9rP1dlXri": {
+      "guid": "0BTBFw6f90Nfh9rP1dlXri",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        7.090406250000006,
+        -8.251298029383955,
+        4.527656250000298
+      ],
+      "bbox": [
+        [
+          6.417999999999999,
+          -11.55,
+          3.119000000000196
+        ],
+        [
+          8.38299999999999,
+          -6.250000000000005,
+          6.000000000000391
+        ]
+      ],
+      "space": "A201",
+      "orientation": null,
+      "name": "A201"
+    },
+    "0BTBFw6f90Nfh9rP1dl_39": {
+      "guid": "0BTBFw6f90Nfh9rP1dl_39",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        2.346399999999998,
+        -5.146200000000005,
+        4.40950000000029
+      ],
+      "bbox": [
+        [
+          0.41699999999998383,
+          -6.666000000000002,
+          3.1190000000001965
+        ],
+        [
+          4.124999999999993,
+          -0.4170000000000078,
+          5.700000000000379
+        ]
+      ],
+      "space": "B203",
+      "orientation": null,
+      "name": "B203"
+    },
+    "10mjSDZJj9gPS2PrQaxa3z": {
+      "guid": "10mjSDZJj9gPS2PrQaxa3z",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        7.8757999999999795,
+        -10.070222222222219,
+        3.137000000000109
+      ],
+      "bbox": [
+        [
+          7.368599999999977,
+          -11.824999999999998,
+          0.018999999999999684
+        ],
+        [
+          8.382999999999983,
+          -8.074999999999996,
+          5.7000000000001965
+        ]
+      ],
+      "space": "A105",
+      "orientation": null,
+      "name": "A105"
+    },
+    "0BTBFw6f90Nfh9rP1dl_3A": {
+      "guid": "0BTBFw6f90Nfh9rP1dl_3A",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        2.433555555555545,
+        -12.762666666666666,
+        4.409500000000288
+      ],
+      "bbox": [
+        [
+          0.4169999999999989,
+          -17.38299999999998,
+          3.119000000000196
+        ],
+        [
+          4.124999999999982,
+          -11.133999999999997,
+          5.700000000000379
+        ]
+      ],
+      "space": "B202",
+      "orientation": null,
+      "name": "B202"
+    },
+    "0BTBFw6f90Nfh9rP1dl_3G": {
+      "guid": "0BTBFw6f90Nfh9rP1dl_3G",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        1.7036312500000035,
+        -9.550631397313827,
+        4.527656250000297
+      ],
+      "bbox": [
+        [
+          0.4169999999999994,
+          -11.55,
+          3.119000000000196
+        ],
+        [
+          2.3820000000000006,
+          -6.250000000000004,
+          6.000000000000391
+        ]
+      ],
+      "space": "B201",
+      "orientation": null,
+      "name": "B201"
+    },
+    "0pNy6pOyf7JPmXRLgxs3sW": {
+      "guid": "0pNy6pOyf7JPmXRLgxs3sW",
+      "elementType": "space",
+      "storey": null,
+      "centroid": [
+        4.399999999999993,
+        -8.9,
+        7.5
+      ],
+      "bbox": [
+        [
+          0.4169999999999927,
+          -17.382999999999985,
+          6.0
+        ],
+        [
+          8.382999999999992,
+          -0.4170000000000158,
+          9.0
+        ]
+      ],
+      "space": "R301",
+      "orientation": null,
+      "name": "R301"
+    }
+  }
+}
