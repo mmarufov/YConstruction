@@ -4,14 +4,13 @@ import SceneKit
 struct Scene2DMarkerOverlay: View {
     let renderer: SceneRendererService
     let defects: [Defect]
-    let currentStorey: String?
     @Binding var tappedDefectId: String?
 
     var body: some View {
         GeometryReader { geo in
             Canvas2DOverlay(
                 renderer: renderer,
-                defects: defects.filter { currentStorey == nil || $0.storey == currentStorey },
+                defects: defects,
                 size: geo.size,
                 tappedDefectId: $tappedDefectId
             )
@@ -80,11 +79,7 @@ private struct Canvas2DOverlay: UIViewRepresentable {
         }
 
         override func draw(_ rect: CGRect) {
-            guard let ctx = UIGraphicsGetCurrentContext(), let renderer = renderer else { return }
-            _ = renderer
-            let red = UIColor.systemRed.cgColor
-            ctx.setStrokeColor(red)
-            ctx.setFillColor(UIColor.systemRed.withAlphaComponent(0.4).cgColor)
+            guard let ctx = UIGraphicsGetCurrentContext(), renderer != nil else { return }
             ctx.setLineWidth(2)
             for defect in defects {
                 drawBoxAndCentroid(ctx: ctx, defect: defect)
@@ -92,24 +87,64 @@ private struct Canvas2DOverlay: UIViewRepresentable {
         }
 
         private func drawBoxAndCentroid(ctx: CGContext, defect: Defect) {
+            let colorIndex = WorkerDirectoryService.shared.colorIndex(forReporter: defect.reporter)
+            let color = WorkerColorPalette.uiColor(for: colorIndex)
+
+            ctx.setStrokeColor(color.cgColor)
+            ctx.setFillColor(color.withAlphaComponent(0.35).cgColor)
+
             let corners = [
                 (defect.bboxMinX, defect.bboxMinY, defect.bboxMinZ),
                 (defect.bboxMaxX, defect.bboxMinY, defect.bboxMinZ),
                 (defect.bboxMaxX, defect.bboxMaxY, defect.bboxMinZ),
                 (defect.bboxMinX, defect.bboxMaxY, defect.bboxMinZ)
             ]
-            var pts: [CGPoint] = corners.map { worldToScreen(x: $0.0, y: $0.1, z: $0.2) }
+            let pts: [CGPoint] = corners.map { worldToScreen(x: $0.0, y: $0.1, z: $0.2) }
             guard !pts.isEmpty else { return }
             ctx.beginPath()
             ctx.move(to: pts[0])
             for p in pts.dropFirst() { ctx.addLine(to: p) }
             ctx.closePath()
-            ctx.strokePath()
+            ctx.drawPath(using: .fillStroke)
 
             let center = worldToScreen(x: defect.centroidX, y: defect.centroidY, z: defect.centroidZ)
-            let r: CGFloat = defect.resolved ? 6 : 8
+            let r: CGFloat = defect.resolved ? 10 : 14
+
+            ctx.setFillColor(UIColor.white.cgColor)
+            ctx.fillEllipse(in: CGRect(x: center.x - r - 2, y: center.y - r - 2, width: (r + 2) * 2, height: (r + 2) * 2))
+
+            ctx.setFillColor(color.cgColor)
             ctx.fillEllipse(in: CGRect(x: center.x - r, y: center.y - r, width: r * 2, height: r * 2))
-            _ = pts.removeAll()
+
+            drawNameChip(ctx: ctx, text: defect.reporter, color: color, at: CGPoint(x: center.x, y: center.y - r - 10))
+        }
+
+        private func drawNameChip(ctx: CGContext, text: String, color: UIColor, at anchor: CGPoint) {
+            let font = UIFont.systemFont(ofSize: 11, weight: .semibold)
+            let attrs: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: UIColor.white
+            ]
+            let attributed = NSAttributedString(string: text, attributes: attrs)
+            let textSize = attributed.size()
+
+            let padX: CGFloat = 8
+            let padY: CGFloat = 3
+            let chipRect = CGRect(
+                x: anchor.x - (textSize.width + padX * 2) / 2,
+                y: anchor.y - (textSize.height + padY * 2),
+                width: textSize.width + padX * 2,
+                height: textSize.height + padY * 2
+            )
+
+            let path = UIBezierPath(roundedRect: chipRect, cornerRadius: chipRect.height / 2)
+            ctx.setFillColor(color.cgColor)
+            ctx.addPath(path.cgPath)
+            ctx.fillPath()
+
+            UIGraphicsPushContext(ctx)
+            attributed.draw(at: CGPoint(x: chipRect.minX + padX, y: chipRect.minY + padY))
+            UIGraphicsPopContext()
         }
 
         private func worldToScreen(x: Double, y: Double, z: Double) -> CGPoint {

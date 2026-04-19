@@ -6,6 +6,7 @@ import Supabase
 @MainActor
 final class SyncService: ObservableObject {
     @Published private(set) var isOnline: Bool = false
+    @Published private(set) var isOnWiFi: Bool = false
     @Published private(set) var isSyncing: Bool = false
     @Published private(set) var lastSyncedAt: Date?
 
@@ -39,15 +40,16 @@ final class SyncService: ObservableObject {
 
         monitor.pathUpdateHandler = { [weak self] path in
             Task { @MainActor in
-                let wasOnline = self?.isOnline ?? false
+                guard let self else { return }
+                let wasOnline = self.isOnline
                 let nowOnline = path.status == .satisfied
-                self?.isOnline = nowOnline
+                self.isOnline = nowOnline
+                self.isOnWiFi = nowOnline && path.usesInterfaceType(.wifi)
                 if nowOnline && !wasOnline {
-                    await self?.catchUp()
-                    await self?.drain()
-                    self?.startRealtime()
+                    await self.reconnectSync()
+                    self.startRealtime()
                 } else if !nowOnline {
-                    self?.stopRealtime()
+                    self.stopRealtime()
                 }
             }
         }
@@ -58,6 +60,25 @@ final class SyncService: ObservableObject {
                 try? await Task.sleep(nanoseconds: 10_000_000_000)
                 await self?.drainIfOnline()
             }
+        }
+
+        Task { await preflight() }
+    }
+
+    func preflight() async {
+        guard supabase.isConfigured, let client = supabase.client() else { return }
+        do {
+            let _: [[String: AnyJSON]] = try await client
+                .from("project_changes")
+                .select("id")
+                .limit(1)
+                .execute()
+                .value
+            for bucket in [supabase.config.photosBucket, supabase.config.issuesBucket, supabase.config.projectsBucket] {
+                _ = try await client.storage.from(bucket).list(path: "", options: SearchOptions(limit: 1))
+            }
+        } catch {
+            print("preflight check failed: \(error)")
         }
     }
 
@@ -76,10 +97,22 @@ final class SyncService: ObservableObject {
     }
 
     func drain() async {
-        guard supabase.isConfigured, let client = supabase.client() else { return }
         guard !isSyncing else { return }
         isSyncing = true
         defer { isSyncing = false }
+        await drainPending()
+    }
+
+    private func reconnectSync() async {
+        guard !isSyncing else { return }
+        isSyncing = true
+        defer { isSyncing = false }
+        await catchUp()
+        await drainPending()
+    }
+
+    private func drainPending() async {
+        guard supabase.isConfigured, let client = supabase.client() else { return }
 
         let pending: [Defect]
         do { pending = try database.pendingSync(projectId: store.projectId) }
@@ -87,8 +120,12 @@ final class SyncService: ObservableObject {
 
         for defect in pending {
             do {
-                try await upload(defect, client: client)
-                try database.markSynced(id: defect.id, photoUrl: publicUrl(defect: defect, client: client))
+                let uploaded = try await upload(defect, client: client)
+                try database.markSynced(
+                    id: defect.id,
+                    photoUrl: publicUrl(defect: defect, client: client),
+                    bcfPath: uploaded.bcfPath
+                )
             } catch {
                 print("sync failed for \(defect.id): \(error)")
                 break
@@ -123,28 +160,34 @@ final class SyncService: ObservableObject {
         }
     }
 
-    private func upload(_ defect: Defect, client: SupabaseClient) async throws {
-        if let photoPath = defect.photoPath, FileManager.default.fileExists(atPath: photoPath) {
-            let remote = "\(defect.projectId)/\(URL(fileURLWithPath: photoPath).lastPathComponent)"
+    @discardableResult
+    private func upload(_ defect: Defect, client: SupabaseClient) async throws -> Defect {
+        var normalized = defect.normalizedForUpload()
+        normalized.synced = true
+
+        if let photoPath = normalized.photoPath, FileManager.default.fileExists(atPath: photoPath) {
+            let remote = "\(normalized.projectId)/\(URL(fileURLWithPath: photoPath).lastPathComponent)"
             let data = try Data(contentsOf: URL(fileURLWithPath: photoPath))
             let options = FileOptions(upsert: true)
             try await client.storage.from(supabase.config.photosBucket)
                 .upload(remote, data: data, options: options)
         }
 
-        if let bcfPath = defect.bcfPath, FileManager.default.fileExists(atPath: bcfPath) {
-            let remote = "\(defect.projectId)/\(URL(fileURLWithPath: bcfPath).lastPathComponent)"
+        if let bcfPath = normalized.bcfPath, FileManager.default.fileExists(atPath: bcfPath) {
+            let remote = "\(normalized.projectId)/\(URL(fileURLWithPath: bcfPath).lastPathComponent)"
             let data = try Data(contentsOf: URL(fileURLWithPath: bcfPath))
             let options = FileOptions(upsert: true)
             try await client.storage.from(supabase.config.issuesBucket)
                 .upload(remote, data: data, options: options)
+            normalized.bcfPath = remote
         }
 
-        let row = try defectPayload(defect)
+        let row = try defectPayload(normalized)
         try await client
             .from("project_changes")
             .upsert(row, onConflict: "id")
             .execute()
+        return normalized
     }
 
     private func defectPayload(_ d: Defect) throws -> [String: AnyJSON] {

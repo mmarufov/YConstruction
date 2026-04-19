@@ -1,46 +1,35 @@
 import SwiftUI
 
 struct SyncStatusBadge: View {
-    let pendingCount: Int
     let lastSyncedAt: Date?
     let isOnline: Bool
+    let isSyncing: Bool
 
     private var color: Color {
         if !isOnline { return .red }
-        if pendingCount > 0 { return .yellow }
+        if isSyncing { return .yellow }
         return .green
     }
 
     private var label: String {
-        if pendingCount > 0 { return "\(pendingCount) pending upload" }
         if !isOnline { return "Offline" }
-        return "All synced"
-    }
-
-    private var subtitle: String? {
-        guard let last = lastSyncedAt else { return nil }
-        let f = RelativeDateTimeFormatter()
-        f.unitsStyle = .short
-        return f.localizedString(for: last, relativeTo: Date())
+        if isSyncing { return "Syncing" }
+        return "Synced"
     }
 
     var body: some View {
         HStack(spacing: 8) {
             Circle()
                 .fill(color)
-                .frame(width: 10, height: 10)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(label)
-                    .font(.caption.weight(.semibold))
-                if let subtitle {
-                    Text(subtitle)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-            }
+                .frame(width: 8, height: 8)
+            Text(label)
+                .font(.callout.weight(.medium))
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(.ultraThinMaterial, in: Capsule())
+        .foregroundStyle(.primary)
+        .padding(.horizontal, 14)
+        .frame(height: 36)
+        .glassEffect(.regular, in: .capsule)
     }
 }

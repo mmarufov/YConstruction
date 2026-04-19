@@ -1,7 +1,7 @@
 import Foundation
 import GRDB
 
-struct Defect: Codable, Equatable, Identifiable, FetchableRecord, MutablePersistableRecord, Sendable {
+nonisolated struct Defect: Codable, Equatable, Identifiable, FetchableRecord, MutablePersistableRecord, Sendable {
     var id: String
     var projectId: String
     var guid: String
@@ -85,7 +85,7 @@ struct Defect: Codable, Equatable, Identifiable, FetchableRecord, MutablePersist
     }
 }
 
-struct VoiceReport: Codable, Sendable {
+nonisolated struct VoiceReport: Codable, Sendable {
     var transcriptOriginal: String
     var transcriptEnglish: String?
 

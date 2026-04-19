@@ -1,7 +1,7 @@
 import Foundation
 import GRDB
 
-final class DatabaseService: @unchecked Sendable {
+nonisolated final class DatabaseService: @unchecked Sendable {
     static let shared: DatabaseService = {
         do {
             return try DatabaseService(filename: "yconstruction.sqlite")
@@ -82,7 +82,40 @@ final class DatabaseService: @unchecked Sendable {
             )
         }
 
+        m.registerMigration("v2_create_workers") { db in
+            try db.create(table: "workers") { t in
+                t.column("id", .text).primaryKey()
+                t.column("name", .text).notNull().unique()
+                t.column("department", .text).notNull()
+                t.column("color_index", .integer).notNull()
+                t.column("created_at", .datetime).notNull()
+                t.column("updated_at", .datetime).notNull()
+            }
+            try db.create(
+                index: "idx_workers_name",
+                on: "workers",
+                columns: ["name"]
+            )
+        }
+
         return m
+    }
+
+    // MARK: - Workers
+
+    func upsert(_ worker: Worker) throws {
+        try dbPool.write { db in
+            var w = worker
+            try w.upsert(db)
+        }
+    }
+
+    func allWorkers() throws -> [Worker] {
+        try dbPool.read { db in
+            try Worker
+                .order(Worker.Columns.colorIndex.asc)
+                .fetchAll(db)
+        }
     }
 
     // MARK: - CRUD
@@ -122,6 +155,18 @@ final class DatabaseService: @unchecked Sendable {
         }
     }
 
+    func syncedDefects(projectId: String? = nil) throws -> [Defect] {
+        try dbPool.read { db in
+            var request = Defect
+                .filter(Defect.Columns.synced == true)
+                .order(Defect.Columns.timestamp.desc)
+            if let projectId {
+                request = request.filter(Defect.Columns.projectId == projectId)
+            }
+            return try request.fetchAll(db)
+        }
+    }
+
     func pendingSync() throws -> [Defect] {
         try pendingSync(projectId: nil)
     }
@@ -140,11 +185,11 @@ final class DatabaseService: @unchecked Sendable {
         }
     }
 
-    func markSynced(id: String, photoUrl: String?) throws {
+    func markSynced(id: String, photoUrl: String?, bcfPath: String? = nil) throws {
         try dbPool.write { db in
             try db.execute(
-                sql: "UPDATE defects SET synced = 1, photo_url = COALESCE(?, photo_url) WHERE id = ?",
-                arguments: [photoUrl, id]
+                sql: "UPDATE defects SET synced = 1, photo_url = COALESCE(?, photo_url), bcf_path = COALESCE(?, bcf_path) WHERE id = ?",
+                arguments: [photoUrl, bcfPath, id]
             )
         }
     }

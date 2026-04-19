@@ -1,10 +1,24 @@
 import SwiftUI
 
+struct AIServiceKey: EnvironmentKey {
+    static let defaultValue: any AIService = MockAIService()
+}
+
+extension EnvironmentValues {
+    var aiService: any AIService {
+        get { self[AIServiceKey.self] }
+        set { self[AIServiceKey.self] = newValue }
+    }
+}
+
 @main
 struct YConstructionApp: App {
+    private let aiService: any AIService = CactusAIService()
+
     var body: some Scene {
         WindowGroup {
             RootView()
+                .environment(\.aiService, aiService)
         }
     }
 }
@@ -24,7 +38,7 @@ struct RootView: View {
                         AppConfig.toggleDebugReporter()
                     }
             } else {
-                ProjectEntryView(onSubmit: loadProject)
+                ProjectListView(onSelect: loadProject)
                     .onLongPressGesture(minimumDuration: 1.2) {
                         showDebugSmokeTests = true
                     }

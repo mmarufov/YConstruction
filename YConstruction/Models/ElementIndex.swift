@@ -1,6 +1,6 @@
 import Foundation
 
-struct ElementIndex: Decodable, Sendable {
+nonisolated struct ElementIndex: Decodable, Sendable {
     let projectId: String
     let schema: String
     let storeys: [Storey]
@@ -13,7 +13,7 @@ struct ElementIndex: Decodable, Sendable {
         case elements
     }
 
-    struct Storey: Decodable, Sendable {
+    nonisolated struct Storey: Decodable, Sendable {
         let name: String
         let elevation: Double
         let heightRange: [Double]
@@ -25,7 +25,7 @@ struct ElementIndex: Decodable, Sendable {
         }
     }
 
-    struct Element: Decodable, Sendable, Identifiable {
+    nonisolated struct Element: Decodable, Sendable, Identifiable {
         let guid: String
         let elementType: String
         let storey: String?

@@ -1,7 +1,7 @@
 import Foundation
 import Supabase
 
-struct SupabaseConfig: Sendable {
+nonisolated struct SupabaseConfig: Sendable {
     let url: URL
     let anonKey: String
     let photosBucket: String
@@ -21,7 +21,7 @@ struct SupabaseConfig: Sendable {
         projectsBucket: "projects"
     )
 
-    static func load(bundle: Bundle = .main) -> SupabaseConfig {
+    nonisolated static func load(bundle: Bundle = .main) -> SupabaseConfig {
         guard let url = bundle.url(forResource: "SupabaseConfig", withExtension: "plist"),
               let data = try? Data(contentsOf: url),
               let plist = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
@@ -41,11 +41,11 @@ struct SupabaseConfig: Sendable {
     }
 }
 
-@MainActor
-final class SupabaseClientService {
+nonisolated final class SupabaseClientService: @unchecked Sendable {
     static let shared = SupabaseClientService()
 
     let config: SupabaseConfig
+    private let clientLock = NSLock()
     private var cachedClient: SupabaseClient?
 
     var isConfigured: Bool { config.isConfigured }
@@ -55,10 +55,14 @@ final class SupabaseClientService {
     }
 
     func client() -> SupabaseClient? {
+        clientLock.lock()
+        defer { clientLock.unlock() }
+
         if let cachedClient { return cachedClient }
         guard config.isConfigured else { return nil }
-        let c = SupabaseClient(supabaseURL: config.url, supabaseKey: config.anonKey)
-        cachedClient = c
-        return c
+
+        let client = SupabaseClient(supabaseURL: config.url, supabaseKey: config.anonKey)
+        cachedClient = client
+        return client
     }
 }

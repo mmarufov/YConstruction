@@ -1,6 +1,6 @@
 import Foundation
 
-enum GemmaServiceError: Error, LocalizedError {
+nonisolated enum GemmaServiceError: Error, LocalizedError {
     case invalidResponse(String)
     case inferenceFailed(String)
 
@@ -12,7 +12,7 @@ enum GemmaServiceError: Error, LocalizedError {
     }
 }
 
-struct ExtractedDefect: Codable, Sendable {
+nonisolated struct ExtractedDefect: Codable, Sendable {
     var storey: String
     var space: String?
     var elementType: String
@@ -21,24 +21,24 @@ struct ExtractedDefect: Codable, Sendable {
     var severity: String
 }
 
-struct PhotoRequest: Codable, Sendable {
+nonisolated struct PhotoRequest: Codable, Sendable {
     var reason: String
 }
 
-struct PhotoAnalysis: Codable, Sendable {
+nonisolated struct PhotoAnalysis: Codable, Sendable {
     var visibleDefectCount: Int
     var severityAssessment: String
     var safetyNotes: String
 }
 
-struct AudioTurnResult: Sendable {
+nonisolated struct AudioTurnResult: Sendable {
     let transcriptEnglish: String?
     let extraction: ExtractedDefect?
     let photoRequest: PhotoRequest?
     let raw: String
 }
 
-struct VisionTurnResult: Sendable {
+nonisolated struct VisionTurnResult: Sendable {
     let analysis: PhotoAnalysis?
     let raw: String
 }

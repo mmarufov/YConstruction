@@ -5,59 +5,59 @@ public typealias CactusModelT = UnsafeMutableRawPointer
 public typealias CactusIndexT = UnsafeMutableRawPointer
 public typealias CactusStreamTranscribeT = UnsafeMutableRawPointer
 
-private let _frameworkInitialized: Void = {
+nonisolated private let _frameworkInitialized: Void = {
     cactus_set_telemetry_environment("swift", nil, nil)
     if let bundleId = Bundle.main.bundleIdentifier {
         bundleId.withCString { cactus_set_app_id($0) }
     }
 }()
 
-private func _err(_ msg: String) -> NSError {
+nonisolated private func _err(_ msg: String) -> NSError {
     let e = cactusGetLastError()
     let desc = e.isEmpty ? msg : e
     return NSError(domain: "cactus", code: -1, userInfo: [NSLocalizedDescriptionKey: desc])
 }
 
-private class TokenCallbackContext {
+nonisolated private final class TokenCallbackContext {
     let callback: (String, UInt32) -> Void
     init(callback: @escaping (String, UInt32) -> Void) {
         self.callback = callback
     }
 }
 
-private func tokenCallbackBridge(token: UnsafePointer<CChar>?, tokenId: UInt32, userData: UnsafeMutableRawPointer?) {
+nonisolated private func tokenCallbackBridge(token: UnsafePointer<CChar>?, tokenId: UInt32, userData: UnsafeMutableRawPointer?) {
     guard let token = token, let userData = userData else { return }
     let context = Unmanaged<TokenCallbackContext>.fromOpaque(userData).takeUnretainedValue()
     context.callback(String(cString: token), tokenId)
 }
 
-private let _defaultBufferSize = 65536
+nonisolated private let _defaultBufferSize = 65536
 
 // MARK: - Telemetry
 
-public func cactusGetLastError() -> String {
+nonisolated public func cactusGetLastError() -> String {
     return String(cString: cactus_get_last_error())
 }
 
-public func cactusSetTelemetryEnvironment(_ path: String) {
+nonisolated public func cactusSetTelemetryEnvironment(_ path: String) {
     cactus_set_telemetry_environment(nil, path, nil)
 }
 
-public func cactusSetAppId(_ appId: String) {
+nonisolated public func cactusSetAppId(_ appId: String) {
     appId.withCString { cactus_set_app_id($0) }
 }
 
-public func cactusTelemetryFlush() {
+nonisolated public func cactusTelemetryFlush() {
     cactus_telemetry_flush()
 }
 
-public func cactusTelemetryShutdown() {
+nonisolated public func cactusTelemetryShutdown() {
     cactus_telemetry_shutdown()
 }
 
 // MARK: - Model lifecycle
 
-public func cactusInit(_ modelPath: String, _ corpusDir: String?, _ cacheIndex: Bool) throws -> CactusModelT {
+nonisolated public func cactusInit(_ modelPath: String, _ corpusDir: String?, _ cacheIndex: Bool) throws -> CactusModelT {
     _ = _frameworkInitialized
     guard let h = cactus_init(modelPath, corpusDir, cacheIndex) else {
         throw _err("Failed to initialize model")
@@ -65,21 +65,21 @@ public func cactusInit(_ modelPath: String, _ corpusDir: String?, _ cacheIndex: 
     return h
 }
 
-public func cactusDestroy(_ model: CactusModelT) {
+nonisolated public func cactusDestroy(_ model: CactusModelT) {
     cactus_destroy(model)
 }
 
-public func cactusReset(_ model: CactusModelT) {
+nonisolated public func cactusReset(_ model: CactusModelT) {
     cactus_reset(model)
 }
 
-public func cactusStop(_ model: CactusModelT) {
+nonisolated public func cactusStop(_ model: CactusModelT) {
     cactus_stop(model)
 }
 
 // MARK: - Inference
 
-public func cactusComplete(_ model: CactusModelT, _ messagesJson: String, _ optionsJson: String?, _ toolsJson: String?, _ onToken: ((String, UInt32) -> Void)?, _ pcmData: Data? = nil) throws -> String {
+nonisolated public func cactusComplete(_ model: CactusModelT, _ messagesJson: String, _ optionsJson: String?, _ toolsJson: String?, _ onToken: ((String, UInt32) -> Void)?, _ pcmData: Data? = nil) throws -> String {
     var buffer = [CChar](repeating: 0, count: _defaultBufferSize)
 
     let callbackContext = onToken.map { TokenCallbackContext(callback: $0) }
