@@ -1,33 +1,29 @@
-# Xcode
-*.xcodeproj/xcuserdata/
-*.xcodeproj/project.xcworkspace/xcuserdata/
-*.xcworkspace/xcuserdata/
-DerivedData/
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-*.xccheckout
-*.moved-aside
-*.xcuserstate
-.build/
-
-# Model weights (each dev downloads locally via cactus CLI)
-weights/
-*.gguf
-*.bin
-*.safetensors
-
-# macOS
 .DS_Store
 
-# Per-developer Claude settings
-.claude/settings.local.json
+# Local virtualenvs and sandboxes
+venv/
+voice-agents-hack/
 
-# Python cache (Bonsai plugin)
-__pycache__/
-*.pyc
+# Xcode local state
+DerivedData/
+build/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# Keep only the vendored iOS framework from the local cactus workspace
+cactus/*
+!cactus/apple/
+cactus/apple/*
+!cactus/apple/cactus-ios.xcframework/
+!cactus/apple/cactus-ios.xcframework/**
+
+# Ignore large local model and tooling folders
+cactus/weights/
+cactus/venv/
+cactus/.venv/
+cactus/.git/
+cactus/.gitmodules
