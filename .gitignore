@@ -24,3 +24,10 @@ weights/
 
 # macOS
 .DS_Store
+
+# Per-developer Claude settings
+.claude/settings.local.json
+
+# Python cache (Bonsai plugin)
+__pycache__/
+*.pyc

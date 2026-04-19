@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		65C58EE92F94402200767A53 /* cactus-ios.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65C58EE72F94401F00767A53 /* cactus-ios.xcframework */; };
 		65C58EEA2F94402200767A53 /* cactus-ios.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 65C58EE72F94401F00767A53 /* cactus-ios.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		AA0001000000000000000003 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = AA0001000000000000000002 /* GRDB */; };
+		AA0002000000000000000003 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = AA0002000000000000000002 /* ZIPFoundation */; };
+		AA0003000000000000000003 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = AA0003000000000000000002 /* Supabase */; };
+		AA0004000000000000000003 /* GLTFKit2 in Frameworks */ = {isa = PBXBuildFile; productRef = AA0004000000000000000002 /* GLTFKit2 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -44,6 +48,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				65C58EE92F94402200767A53 /* cactus-ios.xcframework in Frameworks */,
+				AA0001000000000000000003 /* GRDB in Frameworks */,
+				AA0002000000000000000003 /* ZIPFoundation in Frameworks */,
+				AA0003000000000000000003 /* Supabase in Frameworks */,
+				AA0004000000000000000003 /* GLTFKit2 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,6 +96,10 @@
 			);
 			name = YConstruction;
 			packageProductDependencies = (
+				AA0001000000000000000002 /* GRDB */,
+				AA0002000000000000000002 /* ZIPFoundation */,
+				AA0003000000000000000002 /* Supabase */,
+				AA0004000000000000000002 /* GLTFKit2 */,
 			);
 			productName = YConstruction;
 			productReference = 65C58EC82F94356C00767A53 /* YConstruction.app */;
@@ -117,6 +129,12 @@
 			);
 			mainGroup = 65C58EBF2F94356C00767A53;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AA0001000000000000000001 /* XCRemoteSwiftPackageReference "GRDB" */,
+				AA0002000000000000000001 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+				AA0003000000000000000001 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				AA0004000000000000000001 /* XCRemoteSwiftPackageReference "GLTFKit2" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 65C58EC92F94356C00767A53 /* Products */;
 			projectDirPath = "";
@@ -277,6 +295,9 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "YConstruction uses the camera so workers can attach photos of site defects to their voice reports.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "YConstruction uses the microphone so workers can describe site defects by voice.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "YConstruction saves captured defect photos to your photo library.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -322,6 +343,9 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "YConstruction uses the camera so workers can attach photos of site defects to their voice reports.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "YConstruction uses the microphone so workers can describe site defects by voice.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "YConstruction saves captured defect photos to your photo library.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -376,6 +400,64 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AA0001000000000000000001 /* XCRemoteSwiftPackageReference "GRDB" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.29.0;
+			};
+		};
+		AA0002000000000000000001 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.19;
+			};
+		};
+		AA0003000000000000000001 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.43.0;
+			};
+		};
+		AA0004000000000000000001 /* XCRemoteSwiftPackageReference "GLTFKit2" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/warrenm/GLTFKit2";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.5.15;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA0001000000000000000002 /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0001000000000000000001 /* XCRemoteSwiftPackageReference "GRDB" */;
+			productName = GRDB;
+		};
+		AA0002000000000000000002 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0002000000000000000001 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+		AA0003000000000000000002 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0003000000000000000001 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		AA0004000000000000000002 /* GLTFKit2 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0004000000000000000001 /* XCRemoteSwiftPackageReference "GLTFKit2" */;
+			productName = GLTFKit2;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 65C58EC02F94356C00767A53 /* Project object */;
 }
