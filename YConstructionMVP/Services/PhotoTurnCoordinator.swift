@@ -523,12 +523,30 @@ actor PhotoTurnCoordinator {
         return nil
     }
 
+    /// Fixed follow-up the worker always hears on turn 1 of a report. Keeps the
+    /// severity + storey questions combined into a single spoken line so the
+    /// flow is deterministic (no Gemma variation turn-to-turn).
+    static let reportFollowUpQuestion =
+        "How critical is it, and what level is it on?"
+
+    /// Deterministic two-turn report flow:
+    ///
+    ///   Turn 1 (initial report trigger) → speak `reportFollowUpQuestion`,
+    ///                                     do not upload yet.
+    ///   Turn 2 (any reply) → extract severity/storey best-effort from the
+    ///                        reply, stuff the question + reply into
+    ///                        ai_safety_notes, force readyToUpload=true and
+    ///                        upload to Supabase regardless of content.
+    ///
+    /// No Gemma calls, no heuristic ambiguity, no re-asking. Saves 10–30s per
+    /// turn and guarantees a row lands after exactly two voice turns.
     func processReportTurn(
         existingState: PhotoReportState?,
         newTranscript: String,
         createdAt: Date,
         stagedPhotoPath: String? = nil
     ) async throws -> PhotoReportTurnOutcome {
+        _ = stagedPhotoPath
         var state = existingState ?? PhotoReportState(
             createdAt: createdAt,
             transcriptSnippets: [],
@@ -540,85 +558,38 @@ actor PhotoTurnCoordinator {
         state.transcriptSnippets.append(newTranscript)
         applyReportHeuristics(to: &state, newTranscript: newTranscript)
 
-        // Shortcut: if the heuristics already filled every required field with a
-        // real (non-echo, non-unknown) value, there's nothing for Gemma to add.
-        // Skip the 10–30s model call and upload immediately.
-        if blockingReportFields(for: state).isEmpty {
-            ycLog("[processReportTurn] heuristic-confident: all required fields filled — skipping Gemma")
-            state.lastBlockingFields = []
-            state.repeatedFollowUpCount = 0
+        // Turn 1 — always ask the combined critical+level question, never upload.
+        if state.transcriptSnippets.count <= 1 {
+            ycLog("[processReportTurn] turn 1 — asking fixed follow-up: \(Self.reportFollowUpQuestion)")
             return PhotoReportTurnOutcome(
                 state: state,
-                readyToUpload: true,
-                assistantMessage: "Got it — uploading.",
+                readyToUpload: false,
+                assistantMessage: Self.reportFollowUpQuestion,
                 runtimeStats: nil
             )
         }
 
-        var runtimeStats: AIRuntimeStats?
-        var assistantMessageOverride: String?
-        let prompt = makeReportPrompt(from: state)
-        let imagesEnabled = LocalModelStore.supportsCameraContext
-        let images = (imagesEnabled ? stagedPhotoPath.map { [$0] } : nil) ?? []
-        let started = Date()
-        ycLog("[processReportTurn] sending Gemma call images=\(images.count) maxTokens=160 transcript=\"\(state.combinedTranscript)\"")
-
-        do {
-            let response = try await aiService.send(
-                request: AIRequest(prompt: prompt, imagePaths: images, maxTokens: 160),
-                conversation: []
-            )
-            let elapsed = Date().timeIntervalSince(started)
-            ycLog("[processReportTurn] Gemma replied in \(String(format: "%.2f", elapsed))s textLen=\(response.text.count) preview=\"\(response.text.prefix(200))\"")
-            runtimeStats = response.runtimeStats
-            if let decision = try? decodeReportDecision(from: response.text) {
-                ycLog("[processReportTurn] decoded JSON: ready=\(decision.readyToUpload) blocking=\(decision.blockingMissingFields.joined(separator: ","))")
-                state.fields = state.fields.merged(with: decision.fields)
-                state.explicitlyUnknownFields.formUnion(
-                    decision.explicitlyUnknownFields.map(Self.normalizedFieldName)
-                )
-                state.explicitlyUnknownFields.subtract(resolvedFieldNames(from: state.fields))
-                let trimmedAssistantMessage = (decision.assistantMessage ?? "")
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
-                if !trimmedAssistantMessage.isEmpty {
-                    assistantMessageOverride = trimmedAssistantMessage
-                }
-            } else {
-                ycLog("[processReportTurn] ERROR Gemma response was not valid JSON; falling back to heuristic")
-            }
-        } catch {
-            let elapsed = Date().timeIntervalSince(started)
-            ycLog("[processReportTurn] ERROR Gemma failed after \(String(format: "%.2f", elapsed))s error=\(error.localizedDescription)")
-        }
-
-        let blockingFields = blockingReportFields(for: state)
-        let normalizedBlockingFields = blockingFields.sorted()
-        if normalizedBlockingFields.isEmpty {
-            state.lastBlockingFields = []
-            state.repeatedFollowUpCount = 0
-        } else if normalizedBlockingFields == state.lastBlockingFields {
-            state.repeatedFollowUpCount += 1
+        // Turn 2+ — upload unconditionally. Preserve the question + reply in
+        // ai_safety_notes so Supabase sees the full exchange.
+        let replyTranscript = newTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+        let exchangeNote = "Asked: \"\(Self.reportFollowUpQuestion)\" Reply: \"\(replyTranscript)\""
+        let existingNotes = PhotoReportFields.normalizedText(state.fields.aiSafetyNotes)
+        let combinedNotes: String
+        if let existingNotes {
+            combinedNotes = "\(existingNotes) \(exchangeNote)"
         } else {
-            state.lastBlockingFields = normalizedBlockingFields
-            state.repeatedFollowUpCount = 0
+            combinedNotes = exchangeNote
         }
+        state.fields.aiSafetyNotes = combinedNotes
+        state.lastBlockingFields = []
+        state.repeatedFollowUpCount = 0
 
-        let finalBlockingFields = blockingReportFields(for: state)
-        let readyToUpload = finalBlockingFields.isEmpty
-        let assistantMessage: String
-        if readyToUpload {
-            assistantMessage = "I have enough to upload this report."
-        } else if let override = assistantMessageOverride {
-            assistantMessage = override
-        } else {
-            assistantMessage = reportFollowUpMessage(for: finalBlockingFields, state: state)
-        }
-
+        ycLog("[processReportTurn] turn \(state.transcriptSnippets.count) — forcing upload (hardcoded two-turn flow)")
         return PhotoReportTurnOutcome(
             state: state,
-            readyToUpload: readyToUpload,
-            assistantMessage: assistantMessage,
-            runtimeStats: runtimeStats
+            readyToUpload: true,
+            assistantMessage: "Uploading to Supabase.",
+            runtimeStats: nil
         )
     }
 
