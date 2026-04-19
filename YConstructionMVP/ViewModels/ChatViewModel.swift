@@ -643,7 +643,7 @@ final class ChatViewModel: ObservableObject {
             }
 
         case .report(let state):
-            // Hardcoded two-turn flow: just process the next turn, no pivot check.
+            // Continue the active report intake until the required fields are captured.
             isLoading = true
             statusText = "Reviewing the new report..."
             let outcome = try await photoTurnCoordinator.processReportTurn(
@@ -667,8 +667,8 @@ final class ChatViewModel: ObservableObject {
 
     /// Direct RAG execution: announce "RAG activated", then run `answerQuery`
     /// with the raw transcript as the question (no processQueryTurn JSON
-    /// extraction). Streams the answer into the sentence speaker so speech
-    /// starts as soon as Gemma emits its first sentence.
+    /// extraction). The final spoken answer is cleaned before TTS so generic
+    /// assistant chatter cannot leak into speech.
     private func runDirectRAG(
         transcript: String,
         createdAt: Date,
@@ -701,24 +701,17 @@ final class ChatViewModel: ObservableObject {
 
         do {
             let cachedRecords = await defectSyncService.cachedProjectChangesForRetrieval()
-            let speaker = StreamingSentenceSpeaker(synthesizer: synthesizer)
             let answerOutcome = try await photoTurnCoordinator.answerQuery(
                 state: queryState,
                 cachedRecords: cachedRecords,
-                stagedPhotoPath: stagedPhotoPath,
-                onToken: { token in
-                    Task { @MainActor in speaker.ingest(token) }
-                }
+                stagedPhotoPath: stagedPhotoPath
             )
-            speaker.flush()
             appendMessage(Message(text: answerOutcome.assistantMessage, sender: .assistant))
             latestReply = answerOutcome.assistantMessage
             lastRuntimeText = formatRuntimeStats(answerOutcome.runtimeStats)
             statusText = "Local answer ready."
             lastInputSummary = answerOutcome.summaryText
-            if !speaker.didSpeakAnything {
-                speak(answerOutcome.assistantMessage)
-            }
+            speak(answerOutcome.assistantMessage)
             clearStagedPhotoSession(deleteLocalPhoto: true)
             await refreshLocalSearchStatus()
         } catch {
@@ -796,8 +789,8 @@ final class ChatViewModel: ObservableObject {
             }
         } else {
             stagedPhotoSession = .report(outcome.state)
-            stagedPhotoStatusText = "Photo staged for a new report. Answer the follow-up to finish tagging it."
-            statusText = "Waiting for one more report detail before upload."
+            stagedPhotoStatusText = "Photo staged for a new report. Answer the follow-up to keep tagging it."
+            statusText = "Waiting for more report details before upload."
             appendMessage(Message(text: outcome.assistantMessage, sender: .assistant))
             latestReply = outcome.assistantMessage
             speak(outcome.assistantMessage)
@@ -814,27 +807,17 @@ final class ChatViewModel: ObservableObject {
             statusText = "Searching synced reports on this iPhone..."
             do {
                 let cachedRecords = await defectSyncService.cachedProjectChangesForRetrieval()
-                let speaker = StreamingSentenceSpeaker(synthesizer: synthesizer)
                 let answerOutcome = try await photoTurnCoordinator.answerQuery(
                     state: outcome.state,
                     cachedRecords: cachedRecords,
-                    stagedPhotoPath: stagedPhotoURL?.path,
-                    onToken: { token in
-                        Task { @MainActor in
-                            speaker.ingest(token)
-                        }
-                    }
+                    stagedPhotoPath: stagedPhotoURL?.path
                 )
-                speaker.flush()
                 appendMessage(Message(text: answerOutcome.assistantMessage, sender: .assistant))
                 latestReply = answerOutcome.assistantMessage
                 lastRuntimeText = formatRuntimeStats(answerOutcome.runtimeStats)
                 statusText = "Local answer ready."
                 lastInputSummary = answerOutcome.summaryText
-                // Only speak the full text if streaming never fired (e.g., MockAIService fallback).
-                if !speaker.didSpeakAnything {
-                    speak(answerOutcome.assistantMessage)
-                }
+                speak(answerOutcome.assistantMessage)
                 clearStagedPhotoSession(deleteLocalPhoto: true)
                 await refreshLocalSearchStatus()
             } catch {
