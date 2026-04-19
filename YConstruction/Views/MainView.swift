@@ -5,21 +5,10 @@ import Combine
 @MainActor
 final class MainViewModel: ObservableObject {
     @Published var mode: SceneCameraMode = .perspective3D
-    @Published var currentStorey: String?
-    @Published var availableStoreys: [String] = []
     @Published var tappedDefectId: String?
     @Published var selectedDefect: Defect?
     @Published var isLoading: Bool = true
     @Published var loadError: String?
-
-    @Published var recorderState: RecorderState = .idle
-    @Published var liveTranscript: String = ""
-    @Published var processingTitle: String = "Processing…"
-
-    @Published var photoRequestReason: String?
-    @Published var resolverCandidates: [ResolvedElement] = []
-    @Published var resolverEnglishTranscript: String?
-    @Published var showingResolverPicker: Bool = false
 
     @Published var isOnline: Bool = true
     @Published var isSyncing: Bool = false
@@ -27,12 +16,11 @@ final class MainViewModel: ObservableObject {
     let renderer = SceneRendererService()
     let resolver = DefectResolverService()
     let bcfEmitter = BCFEmitterService()
-    let camera = CameraService()
     let store: DefectStore
     let syncService: SyncService
     let projectId: String
 
-    var pipeline: PipelineService?
+    private var booted = false
     private var storeObservation: AnyCancellable?
     private var errorDismissTask: Task<Void, Never>?
 
@@ -40,9 +28,6 @@ final class MainViewModel: ObservableObject {
         self.store = store
         self.syncService = SyncService(store: store)
         self.projectId = store.projectId
-        // Forward nested store changes so SwiftUI re-renders MainView when
-        // realtime inserts land in the DB (otherwise SwiftUI only subscribes
-        // to viewModel.objectWillChange, not store.objectWillChange).
         self.storeObservation = store.objectWillChange.sink { [weak self] in
             self?.objectWillChange.send()
         }
@@ -66,19 +51,14 @@ final class MainViewModel: ObservableObject {
         loadError = nil
     }
 
-    enum RecorderState: Equatable {
-        case idle
-        case listening
-        case processing(String)
-        case camera(reason: String)
-    }
+    func markBooted() { booted = true }
+    var isBooted: Bool { booted }
 }
 
 struct MainView: View {
     @ObservedObject var viewModel: MainViewModel
     @ObservedObject var workerDirectory: WorkerDirectoryService = .shared
     let onExit: () -> Void
-    @State private var showStoreyAlert = false
     @State private var glossaryExpanded = true
 
     var body: some View {
@@ -94,7 +74,6 @@ struct MainView: View {
                 Scene2DMarkerOverlay(
                     renderer: viewModel.renderer,
                     defects: viewModel.store.defects,
-                    currentStorey: viewModel.currentStorey,
                     tappedDefectId: $viewModel.tappedDefectId
                 )
                 .ignoresSafeArea()
@@ -113,7 +92,6 @@ struct MainView: View {
                     .padding(.top, 4)
                 }
                 Spacer()
-                bottomBar
             }
 
             if viewModel.isLoading {
@@ -126,38 +104,12 @@ struct MainView: View {
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
             }
 
-            if case .listening = viewModel.recorderState {
-                RecordingOverlay(
-                    transcript: viewModel.liveTranscript,
-                    onStop: { Task { await viewModel.pipeline?.stopRecording() } }
-                )
-            }
-
-            if case .processing(let title) = viewModel.recorderState {
-                ProcessingOverlay(title: title)
-            }
-
-            if case .camera(let reason) = viewModel.recorderState {
-                CameraOverlay(
-                    reason: reason,
-                    projectId: viewModel.projectId,
-                    camera: viewModel.camera,
-                    onCapture: { url in
-                        Task { await viewModel.pipeline?.handleCaptured(url: url) }
-                    },
-                    onCancel: {
-                        Task { await viewModel.pipeline?.cancelCamera() }
-                    }
-                )
-                .transition(.opacity)
-            }
-
             if let error = viewModel.loadError {
                 VStack(spacing: 12) {
-                    Text(viewModel.pipeline == nil ? "Failed to Load Project" : "Something Went Wrong")
+                    Text(viewModel.isBooted ? "Something Went Wrong" : "Failed to Load Project")
                         .font(.headline)
                     Text(error).font(.caption).foregroundStyle(.secondary)
-                    if viewModel.pipeline == nil {
+                    if !viewModel.isBooted {
                         Button("Choose Another Project", action: onExit)
                             .buttonStyle(.borderedProminent)
                     }
@@ -175,24 +127,6 @@ struct MainView: View {
                 onDismiss: dismissSelectedDefect
             )
         }
-        .sheet(isPresented: $viewModel.showingResolverPicker) {
-            ResolverPickerSheet(
-                candidates: viewModel.resolverCandidates,
-                transcriptEnglish: viewModel.resolverEnglishTranscript,
-                onPick: { element in
-                    Task { await viewModel.pipeline?.confirmPick(element: element) }
-                    viewModel.showingResolverPicker = false
-                },
-                onSaveAnyway: {
-                    Task { await viewModel.pipeline?.saveWithoutResolver() }
-                    viewModel.showingResolverPicker = false
-                },
-                onCancel: {
-                    Task { await viewModel.pipeline?.cancelResolver() }
-                    viewModel.showingResolverPicker = false
-                }
-            )
-        }
         .onChange(of: viewModel.tappedDefectId) { _, newValue in
             guard let newValue else { return }
             if let defect = viewModel.store.defects.first(where: { $0.id == newValue }) {
@@ -201,9 +135,6 @@ struct MainView: View {
         }
         .onChange(of: viewModel.store.defects) { _, newValue in
             viewModel.renderer.syncMarkers(with: newValue)
-        }
-        .onChange(of: viewModel.currentStorey) { _, newValue in
-            viewModel.renderer.setStorey(newValue)
         }
         .onChange(of: viewModel.mode) { _, newValue in
             viewModel.renderer.setMode(newValue)
@@ -215,21 +146,16 @@ struct MainView: View {
         }
     }
 
-    private var visibleDefects: [Defect] {
-        let storey = viewModel.currentStorey
-        return viewModel.store.defects.filter { storey == nil || $0.storey == storey }
-    }
-
     private var defectCountsByReporter: [String: Int] {
         var counts: [String: Int] = [:]
-        for d in visibleDefects {
+        for d in viewModel.store.defects {
             counts[d.reporter, default: 0] += 1
         }
         return counts
     }
 
     private var workersInView: [Worker] {
-        let names = Set(visibleDefects.map(\.reporter))
+        let names = Set(viewModel.store.defects.map(\.reporter))
         guard !names.isEmpty else { return [] }
 
         let directoryByName = Dictionary(
@@ -270,7 +196,6 @@ struct MainView: View {
         GlassEffectContainer(spacing: 12) {
             HStack(spacing: 10) {
                 backButton
-                storeyPicker
                 SyncStatusBadge(
                     lastSyncedAt: viewModel.store.lastSyncedAt,
                     isOnline: viewModel.isOnline,
@@ -294,46 +219,6 @@ struct MainView: View {
                 .glassEffect(.regular.interactive(), in: .circle)
         }
         .accessibilityLabel("Back to projects")
-    }
-
-    @ViewBuilder
-    private var storeyPicker: some View {
-        if viewModel.availableStoreys.count > 1 {
-            Menu {
-                ForEach(viewModel.availableStoreys, id: \.self) { storey in
-                    Button(storey) { viewModel.currentStorey = storey }
-                }
-            } label: {
-                storeyLabel(showChevron: true)
-            }
-        } else if let onlyStorey = viewModel.availableStoreys.first {
-            Button {
-                showStoreyAlert = true
-            } label: {
-                storeyLabel(showChevron: false)
-            }
-            .alert("Single Storey Project", isPresented: $showStoreyAlert) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text("This project has only one storey: \(onlyStorey).")
-            }
-        }
-    }
-
-    private func storeyLabel(showChevron: Bool) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: "square.stack.3d.up")
-            Text(viewModel.currentStorey ?? "Storey")
-                .lineLimit(1)
-            if showChevron {
-                Image(systemName: "chevron.down").font(.caption2)
-            }
-        }
-        .font(.callout.weight(.medium))
-        .foregroundStyle(.primary)
-        .padding(.horizontal, 14)
-        .frame(height: 36)
-        .glassEffect(.regular.interactive(), in: .capsule)
     }
 
     @ViewBuilder
@@ -372,36 +257,6 @@ struct MainView: View {
         }
     }
 
-    // MARK: - Bottom bar
-
-    private var bottomBar: some View {
-        HStack {
-            Spacer()
-            Button {
-                Task { await viewModel.pipeline?.toggleRecording() }
-            } label: {
-                ZStack {
-                    Circle().fill(.red).frame(width: 78, height: 78)
-                    Image(systemName: "mic.fill")
-                        .font(.title)
-                        .foregroundStyle(.white)
-                }
-                .shadow(radius: 8)
-            }
-            .disabled(disableRecord)
-            Spacer()
-        }
-        .padding(.bottom, 30)
-    }
-
-    private var disableRecord: Bool {
-        guard viewModel.pipeline != nil, !viewModel.isLoading else { return true }
-        switch viewModel.recorderState {
-        case .idle, .listening: return false
-        default: return true
-        }
-    }
-
     private func dismissSelectedDefect() {
         viewModel.selectedDefect = nil
         viewModel.tappedDefectId = nil
@@ -416,7 +271,7 @@ struct MainView: View {
     // MARK: - Boot
 
     private func boot() async {
-        guard viewModel.pipeline == nil else { return }
+        guard !viewModel.isBooted else { return }
 
         let loader = ProjectLoaderService(projectId: viewModel.projectId)
         do {
@@ -424,21 +279,12 @@ struct MainView: View {
             try await viewModel.renderer.load(glbURL: bundle.glbURL)
             try viewModel.resolver.load(from: bundle.elementIndexURL)
             if let idx = viewModel.resolver.index {
-                var storeyNames = idx.storeys.map(\.name)
-                if storeyNames.isEmpty { storeyNames = ["Ground"] }
-                viewModel.availableStoreys = storeyNames
-                viewModel.renderer.configure(storeys: idx.storeys)
                 viewModel.renderer.filterMeshes(keepingIndexed: idx)
-                let initialStorey = idx.storeys.first(where: { $0.name == "Level 1" })?.name
-                    ?? idx.storeys.first?.name
-                    ?? storeyNames.first
-                viewModel.currentStorey = initialStorey
-                viewModel.renderer.setStorey(initialStorey)
             }
             viewModel.renderer.syncMarkers(with: viewModel.store.defects)
-            viewModel.pipeline = PipelineService(viewModel: viewModel)
             viewModel.syncService.start()
             workerDirectory.start()
+            viewModel.markBooted()
             viewModel.isLoading = false
         } catch is CancellationError {
             viewModel.isLoading = false

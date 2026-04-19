@@ -59,6 +59,25 @@ final class SyncService: ObservableObject {
                 await self?.drainIfOnline()
             }
         }
+
+        Task { await preflight() }
+    }
+
+    func preflight() async {
+        guard supabase.isConfigured, let client = supabase.client() else { return }
+        do {
+            let _: [[String: AnyJSON]] = try await client
+                .from("project_changes")
+                .select("id")
+                .limit(1)
+                .execute()
+                .value
+            for bucket in [supabase.config.photosBucket, supabase.config.issuesBucket, supabase.config.projectsBucket] {
+                _ = try await client.storage.from(bucket).list(path: "", options: SearchOptions(limit: 1))
+            }
+        } catch {
+            print("preflight check failed: \(error)")
+        }
     }
 
     func stop() {
@@ -136,23 +155,25 @@ final class SyncService: ObservableObject {
     }
 
     private func upload(_ defect: Defect, client: SupabaseClient) async throws {
-        if let photoPath = defect.photoPath, FileManager.default.fileExists(atPath: photoPath) {
-            let remote = "\(defect.projectId)/\(URL(fileURLWithPath: photoPath).lastPathComponent)"
+        let normalized = defect.normalizedForUpload()
+
+        if let photoPath = normalized.photoPath, FileManager.default.fileExists(atPath: photoPath) {
+            let remote = "\(normalized.projectId)/\(URL(fileURLWithPath: photoPath).lastPathComponent)"
             let data = try Data(contentsOf: URL(fileURLWithPath: photoPath))
             let options = FileOptions(upsert: true)
             try await client.storage.from(supabase.config.photosBucket)
                 .upload(remote, data: data, options: options)
         }
 
-        if let bcfPath = defect.bcfPath, FileManager.default.fileExists(atPath: bcfPath) {
-            let remote = "\(defect.projectId)/\(URL(fileURLWithPath: bcfPath).lastPathComponent)"
+        if let bcfPath = normalized.bcfPath, FileManager.default.fileExists(atPath: bcfPath) {
+            let remote = "\(normalized.projectId)/\(URL(fileURLWithPath: bcfPath).lastPathComponent)"
             let data = try Data(contentsOf: URL(fileURLWithPath: bcfPath))
             let options = FileOptions(upsert: true)
             try await client.storage.from(supabase.config.issuesBucket)
                 .upload(remote, data: data, options: options)
         }
 
-        let row = try defectPayload(defect)
+        let row = try defectPayload(normalized)
         try await client
             .from("project_changes")
             .upsert(row, onConflict: "id")

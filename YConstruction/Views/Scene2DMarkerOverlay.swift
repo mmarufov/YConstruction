@@ -4,14 +4,13 @@ import SceneKit
 struct Scene2DMarkerOverlay: View {
     let renderer: SceneRendererService
     let defects: [Defect]
-    let currentStorey: String?
     @Binding var tappedDefectId: String?
 
     var body: some View {
         GeometryReader { geo in
             Canvas2DOverlay(
                 renderer: renderer,
-                defects: defects.filter { currentStorey == nil || $0.storey == currentStorey },
+                defects: defects,
                 size: geo.size,
                 tappedDefectId: $tappedDefectId
             )

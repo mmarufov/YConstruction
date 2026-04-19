@@ -7,12 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3558C72FC0857A16D8A841A3 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B493897AA88B167B85448509 /* ChatViewModel.swift */; };
 		65C58EE92F94402200767A53 /* cactus-ios.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65C58EE72F94401F00767A53 /* cactus-ios.xcframework */; };
 		65C58EEA2F94402200767A53 /* cactus-ios.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 65C58EE72F94401F00767A53 /* cactus-ios.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		72253D4FA187A9481603AD5A /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 203CEFB6E11EF106929E9E0E /* Message.swift */; };
+		7631DFC94E8947BC084D427A /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115B7495C4E5C4224FEC0B46 /* ChatView.swift */; };
+		7948D6E25864D26603A98A7D /* BackendSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE799B417AB7C3FE366802D2 /* BackendSyncService.swift */; };
+		7DF703FCB4E76C0BB98DA3D6 /* LocalModelStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C1512FC85B42FCA6AE50DC /* LocalModelStore.swift */; };
+		82BBE70BAF1780D184E76055 /* LocalRAGService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFFFBEEB719005F01DAF94AF /* LocalRAGService.swift */; };
+		91164889298301BEFA694359 /* CactusRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2986B55218D5BCBBA312D309 /* CactusRuntime.swift */; };
 		AA0001000000000000000003 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = AA0001000000000000000002 /* GRDB */; };
 		AA0002000000000000000003 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = AA0002000000000000000002 /* ZIPFoundation */; };
 		AA0003000000000000000003 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = AA0003000000000000000002 /* Supabase */; };
 		AA0004000000000000000003 /* GLTFKit2 in Frameworks */ = {isa = PBXBuildFile; productRef = AA0004000000000000000002 /* GLTFKit2 */; };
+		BB487CDEF77309995840AF77 /* AIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E527BB47C1D7E4341E41142 /* AIService.swift */; };
+		C80599606245FAEF72A395F6 /* PhotoTurnCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EDB301B3E6357393176936 /* PhotoTurnCoordinator.swift */; };
+		D082F119EF46AC6D9F2E73FC /* CactusAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83C207D3DE5CC7E773DC021 /* CactusAIService.swift */; };
+		E12776F637F7B9A9966EB5AB /* MockAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F1E76C0595A35756F4B46D3 /* MockAIService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -30,13 +41,26 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		02C1512FC85B42FCA6AE50DC /* LocalModelStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalModelStore.swift; sourceTree = "<group>"; };
+		115B7495C4E5C4224FEC0B46 /* ChatView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		11EDB301B3E6357393176936 /* PhotoTurnCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhotoTurnCoordinator.swift; sourceTree = "<group>"; };
+		1E527BB47C1D7E4341E41142 /* AIService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIService.swift; sourceTree = "<group>"; };
+		203CEFB6E11EF106929E9E0E /* Message.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		2986B55218D5BCBBA312D309 /* CactusRuntime.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CactusRuntime.swift; sourceTree = "<group>"; };
+		2F1E76C0595A35756F4B46D3 /* MockAIService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAIService.swift; sourceTree = "<group>"; };
 		65C58EC82F94356C00767A53 /* YConstruction.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YConstruction.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		65C58EE72F94401F00767A53 /* cactus-ios.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = "cactus-ios.xcframework"; sourceTree = "<group>"; };
+		B493897AA88B167B85448509 /* ChatViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
+		CE799B417AB7C3FE366802D2 /* BackendSyncService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackendSyncService.swift; sourceTree = "<group>"; };
+		E83C207D3DE5CC7E773DC021 /* CactusAIService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CactusAIService.swift; sourceTree = "<group>"; };
+		EFFFBEEB719005F01DAF94AF /* LocalRAGService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalRAGService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		65C58ECA2F94356C00767A53 /* YConstruction */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = YConstruction;
 			sourceTree = "<group>";
 		};
@@ -58,12 +82,29 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4C4E1D7780E5DF90AF72B91C /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				1E527BB47C1D7E4341E41142 /* AIService.swift */,
+				2986B55218D5BCBBA312D309 /* CactusRuntime.swift */,
+				02C1512FC85B42FCA6AE50DC /* LocalModelStore.swift */,
+				2F1E76C0595A35756F4B46D3 /* MockAIService.swift */,
+				E83C207D3DE5CC7E773DC021 /* CactusAIService.swift */,
+				EFFFBEEB719005F01DAF94AF /* LocalRAGService.swift */,
+				CE799B417AB7C3FE366802D2 /* BackendSyncService.swift */,
+				11EDB301B3E6357393176936 /* PhotoTurnCoordinator.swift */,
+			);
+			name = Services;
+			path = Services;
+			sourceTree = "<group>";
+		};
 		65C58EBF2F94356C00767A53 = {
 			isa = PBXGroup;
 			children = (
 				65C58ECA2F94356C00767A53 /* YConstruction */,
 				65C58EC92F94356C00767A53 /* Products */,
 				65C58EE72F94401F00767A53 /* cactus-ios.xcframework */,
+				C5EE7AAC3E563A470C052128 /* YConstructionMVP */,
 			);
 			sourceTree = "<group>";
 		};
@@ -73,6 +114,45 @@
 				65C58EC82F94356C00767A53 /* YConstruction.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		6E3B9F2C009E5C781CADB3D5 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				115B7495C4E5C4224FEC0B46 /* ChatView.swift */,
+			);
+			name = Views;
+			path = Views;
+			sourceTree = "<group>";
+		};
+		831AF48D2B8FED79FD99D573 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				B493897AA88B167B85448509 /* ChatViewModel.swift */,
+			);
+			name = ViewModels;
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		C5EE7AAC3E563A470C052128 /* YConstructionMVP */ = {
+			isa = PBXGroup;
+			children = (
+				D9D5832E8C585D1B20F37478 /* Models */,
+				4C4E1D7780E5DF90AF72B91C /* Services */,
+				831AF48D2B8FED79FD99D573 /* ViewModels */,
+				6E3B9F2C009E5C781CADB3D5 /* Views */,
+			);
+			name = YConstructionMVP;
+			path = YConstructionMVP;
+			sourceTree = "<group>";
+		};
+		D9D5832E8C585D1B20F37478 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				203CEFB6E11EF106929E9E0E /* Message.swift */,
+			);
+			name = Models;
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -130,7 +210,7 @@
 			mainGroup = 65C58EBF2F94356C00767A53;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				AA0001000000000000000001 /* XCRemoteSwiftPackageReference "GRDB" */,
+				AA0001000000000000000001 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 				AA0002000000000000000001 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 				AA0003000000000000000001 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				AA0004000000000000000001 /* XCRemoteSwiftPackageReference "GLTFKit2" */,
@@ -160,6 +240,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				72253D4FA187A9481603AD5A /* Message.swift in Sources */,
+				BB487CDEF77309995840AF77 /* AIService.swift in Sources */,
+				91164889298301BEFA694359 /* CactusRuntime.swift in Sources */,
+				7DF703FCB4E76C0BB98DA3D6 /* LocalModelStore.swift in Sources */,
+				E12776F637F7B9A9966EB5AB /* MockAIService.swift in Sources */,
+				D082F119EF46AC6D9F2E73FC /* CactusAIService.swift in Sources */,
+				82BBE70BAF1780D184E76055 /* LocalRAGService.swift in Sources */,
+				7948D6E25864D26603A98A7D /* BackendSyncService.swift in Sources */,
+				C80599606245FAEF72A395F6 /* PhotoTurnCoordinator.swift in Sources */,
+				3558C72FC0857A16D8A841A3 /* ChatViewModel.swift in Sources */,
+				7631DFC94E8947BC084D427A /* ChatView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -402,7 +493,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		AA0001000000000000000001 /* XCRemoteSwiftPackageReference "GRDB" */ = {
+		AA0001000000000000000001 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift";
 			requirement = {
@@ -439,7 +530,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		AA0001000000000000000002 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = AA0001000000000000000001 /* XCRemoteSwiftPackageReference "GRDB" */;
+			package = AA0001000000000000000001 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
 		};
 		AA0002000000000000000002 /* ZIPFoundation */ = {

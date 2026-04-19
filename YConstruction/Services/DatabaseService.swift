@@ -155,6 +155,18 @@ final class DatabaseService: @unchecked Sendable {
         }
     }
 
+    func syncedDefects(projectId: String? = nil) throws -> [Defect] {
+        try dbPool.read { db in
+            var request = Defect
+                .filter(Defect.Columns.synced == true)
+                .order(Defect.Columns.timestamp.desc)
+            if let projectId {
+                request = request.filter(Defect.Columns.projectId == projectId)
+            }
+            return try request.fetchAll(db)
+        }
+    }
+
     func pendingSync() throws -> [Defect] {
         try pendingSync(projectId: nil)
     }

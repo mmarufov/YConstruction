@@ -70,12 +70,18 @@ struct DetailSheet: View {
                     }
                 }
 
-                LabeledSection(title: "Location") {
-                    Text("\(defect.storey) > \(defect.space ?? "—") > \(defect.orientation ?? "—") \(defect.elementType)")
-                        .font(.callout)
+                LabeledSection(title: "AI-extracted location") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        metadataRow(label: "Storey", value: defect.storey)
+                        metadataRow(label: "Space", value: defect.space ?? "—")
+                        metadataRow(label: "Orientation", value: defect.orientation ?? "—")
+                        metadataRow(label: "Element type", value: defect.elementType)
+                    }
                 }
 
                 metadataSection
+
+                dimensionsSection
 
                 Button(action: onResolve) {
                     HStack {
@@ -145,6 +151,36 @@ struct DetailSheet: View {
                 metadataRow(
                     label: "Sync",
                     value: defect.synced ? "Synced" : "Pending"
+                )
+            }
+        }
+    }
+
+    private var dimensionsSection: some View {
+        LabeledSection(title: "Bounding box") {
+            VStack(alignment: .leading, spacing: 6) {
+                metadataRow(
+                    label: "Min",
+                    value: String(
+                        format: "x %.2f · y %.2f · z %.2f",
+                        defect.bboxMinX, defect.bboxMinY, defect.bboxMinZ
+                    )
+                )
+                metadataRow(
+                    label: "Max",
+                    value: String(
+                        format: "x %.2f · y %.2f · z %.2f",
+                        defect.bboxMaxX, defect.bboxMaxY, defect.bboxMaxZ
+                    )
+                )
+                metadataRow(
+                    label: "Size",
+                    value: String(
+                        format: "%.2f × %.2f × %.2f m",
+                        defect.bboxMaxX - defect.bboxMinX,
+                        defect.bboxMaxY - defect.bboxMinY,
+                        defect.bboxMaxZ - defect.bboxMinZ
+                    )
                 )
             }
         }
