@@ -339,6 +339,18 @@ actor PhotoTurnCoordinator {
         }
     }
 
+    nonisolated private struct QueryAnswerDecision: Codable {
+        let spokenAnswer: String
+        let summaryLine: String?
+        let citedMatchIndexes: [Int]?
+
+        enum CodingKeys: String, CodingKey {
+            case spokenAnswer = "spoken_answer"
+            case summaryLine = "summary_line"
+            case citedMatchIndexes = "cited_match_indexes"
+        }
+    }
+
     private let aiService: any AIService
     private let ragService: LocalRAGService
     private let vocabulary: IFCVocabulary
@@ -523,12 +535,17 @@ actor PhotoTurnCoordinator {
         return nil
     }
 
+    /// Structured multi-turn report intake. Each worker turn re-runs field
+    /// extraction over the full transcript history, then asks about the next
+    /// missing SQL-aligned field until the report is ready to upload or the
+    /// worker explicitly marks remaining fields unknown.
     func processReportTurn(
         existingState: PhotoReportState?,
         newTranscript: String,
         createdAt: Date,
         stagedPhotoPath: String? = nil
     ) async throws -> PhotoReportTurnOutcome {
+        _ = stagedPhotoPath
         var state = existingState ?? PhotoReportState(
             createdAt: createdAt,
             transcriptSnippets: [],
@@ -539,87 +556,157 @@ actor PhotoTurnCoordinator {
         )
         state.transcriptSnippets.append(newTranscript)
         applyReportHeuristics(to: &state, newTranscript: newTranscript)
-
-        // Shortcut: if the heuristics already filled every required field with a
-        // real (non-echo, non-unknown) value, there's nothing for Gemma to add.
-        // Skip the 10–30s model call and upload immediately.
-        if blockingReportFields(for: state).isEmpty {
-            ycLog("[processReportTurn] heuristic-confident: all required fields filled — skipping Gemma")
-            state.lastBlockingFields = []
-            state.repeatedFollowUpCount = 0
-            return PhotoReportTurnOutcome(
-                state: state,
-                readyToUpload: true,
-                assistantMessage: "Got it — uploading.",
-                runtimeStats: nil
-            )
-        }
+        let blockingBefore = blockingReportFields(for: state)
+        let prompt = makeReportPrompt(from: state)
+        let started = Date()
+        ycLog("[processReportTurn] sending Gemma structured call maxTokens=180 turns=\(state.transcriptSnippets.count) blockingBefore=\(blockingBefore)")
 
         var runtimeStats: AIRuntimeStats?
-        var assistantMessageOverride: String?
-        let prompt = makeReportPrompt(from: state)
-        let imagesEnabled = LocalModelStore.supportsCameraContext
-        let images = (imagesEnabled ? stagedPhotoPath.map { [$0] } : nil) ?? []
-        let started = Date()
-        ycLog("[processReportTurn] sending Gemma call images=\(images.count) maxTokens=160 transcript=\"\(state.combinedTranscript)\"")
-
         do {
             let response = try await aiService.send(
-                request: AIRequest(prompt: prompt, imagePaths: images, maxTokens: 160),
+                request: AIRequest(prompt: prompt, maxTokens: 180),
                 conversation: []
             )
             let elapsed = Date().timeIntervalSince(started)
             ycLog("[processReportTurn] Gemma replied in \(String(format: "%.2f", elapsed))s textLen=\(response.text.count) preview=\"\(response.text.prefix(200))\"")
             runtimeStats = response.runtimeStats
+
             if let decision = try? decodeReportDecision(from: response.text) {
-                ycLog("[processReportTurn] decoded JSON: ready=\(decision.readyToUpload) blocking=\(decision.blockingMissingFields.joined(separator: ","))")
-                state.fields = state.fields.merged(with: decision.fields)
-                state.explicitlyUnknownFields.formUnion(
-                    decision.explicitlyUnknownFields.map(Self.normalizedFieldName)
-                )
-                state.explicitlyUnknownFields.subtract(resolvedFieldNames(from: state.fields))
-                let trimmedAssistantMessage = (decision.assistantMessage ?? "")
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
-                if !trimmedAssistantMessage.isEmpty {
-                    assistantMessageOverride = trimmedAssistantMessage
-                }
-            } else {
-                ycLog("[processReportTurn] ERROR Gemma response was not valid JSON; falling back to heuristic")
+                let modelBlocking = decision.blockingMissingFields.map(Self.normalizedFieldName)
+                ycLog("[processReportTurn] decoded JSON: ready=\(decision.readyToUpload) modelBlocking=\(modelBlocking) unknown=\(decision.explicitlyUnknownFields)")
+                return resolvedReportOutcome(from: decision, baseState: state, runtimeStats: runtimeStats)
             }
+
+            ycLog("[processReportTurn] ERROR Gemma response was not valid JSON; falling back to heuristics")
         } catch {
             let elapsed = Date().timeIntervalSince(started)
             ycLog("[processReportTurn] ERROR Gemma failed after \(String(format: "%.2f", elapsed))s error=\(error.localizedDescription)")
         }
 
+        let fallback = fallbackReportOutcome(for: state, runtimeStats: runtimeStats)
+        let fallbackBlocking = blockingReportFields(for: fallback.state)
+        ycLog("[processReportTurn] fallback blocking=\(fallbackBlocking) ready=\(fallback.readyToUpload) message=\"\(fallback.assistantMessage)\"")
+        return fallback
+    }
+
+    private func resolvedReportOutcome(
+        from decision: ReportDecision,
+        baseState: PhotoReportState,
+        runtimeStats: AIRuntimeStats?
+    ) -> PhotoReportTurnOutcome {
+        var state = baseState
+        state.fields = state.fields.merged(with: decision.fields)
+        state.explicitlyUnknownFields.formUnion(decision.explicitlyUnknownFields.map(Self.normalizedFieldName))
+        state.explicitlyUnknownFields.subtract(resolvedFieldNames(from: state.fields))
+
         let blockingFields = blockingReportFields(for: state)
-        let normalizedBlockingFields = blockingFields.sorted()
-        if normalizedBlockingFields.isEmpty {
+        let isRepeated = !blockingFields.isEmpty && blockingFields == state.lastBlockingFields
+        state.repeatedFollowUpCount = isRepeated ? (state.repeatedFollowUpCount + 1) : 0
+        state.lastBlockingFields = blockingFields
+
+        if blockingFields.isEmpty {
             state.lastBlockingFields = []
             state.repeatedFollowUpCount = 0
-        } else if normalizedBlockingFields == state.lastBlockingFields {
-            state.repeatedFollowUpCount += 1
-        } else {
-            state.lastBlockingFields = normalizedBlockingFields
-            state.repeatedFollowUpCount = 0
+            state.fields.aiSafetyNotes = mergedReportExchangeNote(
+                into: state.fields.aiSafetyNotes,
+                transcriptSnippets: state.transcriptSnippets
+            )
+
+            return PhotoReportTurnOutcome(
+                state: state,
+                readyToUpload: true,
+                assistantMessage: "I have enough to upload this report.",
+                runtimeStats: runtimeStats
+            )
         }
 
-        let finalBlockingFields = blockingReportFields(for: state)
-        let readyToUpload = finalBlockingFields.isEmpty
-        let assistantMessage: String
-        if readyToUpload {
-            assistantMessage = "I have enough to upload this report."
-        } else if let override = assistantMessageOverride {
-            assistantMessage = override
-        } else {
-            assistantMessage = reportFollowUpMessage(for: finalBlockingFields, state: state)
-        }
+        let assistantMessage = cleanedReportAssistantMessage(
+            decision.assistantMessage,
+            blockingFields: blockingFields,
+            state: state
+        ) ?? reportFollowUpMessage(for: blockingFields, state: state)
 
         return PhotoReportTurnOutcome(
             state: state,
-            readyToUpload: readyToUpload,
+            readyToUpload: false,
             assistantMessage: assistantMessage,
             runtimeStats: runtimeStats
         )
+    }
+
+    private func cleanedReportAssistantMessage(
+        _ raw: String?,
+        blockingFields: [String],
+        state: PhotoReportState
+    ) -> String? {
+        _ = state
+        guard let raw else { return nil }
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        let firstLine = trimmed
+            .split(whereSeparator: { $0.isNewline })
+            .first
+            .map(String.init) ?? trimmed
+
+        let candidate: String
+        if let mark = firstLine.firstIndex(of: "?") {
+            candidate = String(firstLine[...mark]).trimmingCharacters(in: .whitespacesAndNewlines)
+        } else {
+            candidate = firstLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        guard candidate.count >= 8, candidate.count <= 180, candidate.hasSuffix("?") else {
+            return nil
+        }
+
+        let lower = candidate.lowercased()
+        let bannedPhrases = [
+            "what can i do for you",
+            "how can i help",
+            "how may i help",
+            "what would you like to do",
+            "what would you like me to do",
+            "what can i help you with",
+            "okay, i'm ready to help",
+            "okay, i am ready to help",
+            "ready to help",
+            "tell me more",
+            "can you clarify",
+            "what else can you tell me"
+        ]
+        guard !bannedPhrases.contains(where: { lower.contains($0) }) else {
+            return nil
+        }
+
+        if blockingFields.isEmpty {
+            return nil
+        }
+
+        return candidate
+    }
+
+    private func mergedReportExchangeNote(
+        into existingNotes: String?,
+        transcriptSnippets: [String]
+    ) -> String? {
+        let exchangeNote = transcriptSnippets.enumerated()
+            .map { idx, snippet in
+                let clean = snippet.trimmingCharacters(in: .whitespacesAndNewlines)
+                return "Turn \(idx + 1): \"\(clean)\""
+            }
+            .joined(separator: " | ")
+
+        guard !exchangeNote.isEmpty else {
+            return preferred(existingNotes, nil)
+        }
+        guard let existing = preferred(existingNotes, nil) else {
+            return exchangeNote
+        }
+        if existing.contains(exchangeNote) {
+            return existing
+        }
+        return existing + " " + exchangeNote
     }
 
     func processQueryTurn(
@@ -782,6 +869,8 @@ actor PhotoTurnCoordinator {
         stagedPhotoPath: String? = nil,
         onToken: (@Sendable (String) -> Void)? = nil
     ) async throws -> PhotoQueryAnswerOutcome {
+        _ = stagedPhotoPath
+        _ = onToken
         ycLog("[answerQuery] RAG INVOKED for query=\"\(state.questionSummary ?? state.combinedTranscript)\" cachedRecords=\(cachedRecords.count)")
         let indexedCount = try await ragService.refreshIndex(from: cachedRecords)
         let queryText = queryText(for: state)
@@ -810,49 +899,38 @@ actor PhotoTurnCoordinator {
             }
             .joined(separator: "\n\n")
 
-        let prompt = """
-        Answer a worker's question about a staged construction photo.
-        You cannot inspect the image itself.
-        Use only the retrieved evidence below.
-        If the evidence is weak, missing, or conflicting, say that plainly.
-        Reply in 2 to 4 concise sentences.
-
-        Question:
-        \(state.questionSummary ?? state.combinedTranscript)
-
-        Search context:
-        storey=\(preferred(state.storey, nil) ?? "unknown")
-        space=\(preferred(state.space, nil) ?? "unknown")
-        orientation=\(preferred(state.orientation, nil) ?? "unknown")
-        element_type=\(preferred(state.elementType, nil) ?? "unknown")
-        timeframe=\(preferred(state.timeframeHint, nil) ?? "unknown")
-
-        Evidence:
-        \(evidence)
-        """
-
-        let imagesEnabled = LocalModelStore.supportsCameraContext
-        let images = (imagesEnabled ? stagedPhotoPath.map { [$0] } : nil) ?? []
+        let prompt = makeQueryAnswerPrompt(state: state, evidence: evidence)
         let started = Date()
         let topScore = queryResult.matches.first?.score ?? 0
-        ycLog("[answerQuery] sending Gemma call indexed=\(indexedCount) matches=\(queryResult.matches.count) topScore=\(String(format: "%.3f", topScore)) images=\(images.count) streaming=\(onToken != nil)")
-        let request = AIRequest(prompt: prompt, imagePaths: images, maxTokens: 160)
-        let response: AIResponse
-        if let onToken {
-            response = try await aiService.sendStreaming(
-                request: request,
-                conversation: [],
-                onToken: onToken
-            )
-        } else {
-            response = try await aiService.send(request: request, conversation: [])
-        }
+        ycLog("[answerQuery] sending Gemma structured call indexed=\(indexedCount) matches=\(queryResult.matches.count) topScore=\(String(format: "%.3f", topScore)) streaming=false")
+        let response = try await aiService.send(
+            request: AIRequest(prompt: prompt, maxTokens: 220),
+            conversation: []
+        )
         let elapsed = Date().timeIntervalSince(started)
-        ycLog("[answerQuery] Gemma replied in \(String(format: "%.2f", elapsed))s textLen=\(response.text.count)")
+        ycLog("[answerQuery] Gemma replied in \(String(format: "%.2f", elapsed))s textLen=\(response.text.count) preview=\"\(response.text.prefix(220))\"")
+
+        if let decision = try? decodeQueryAnswerDecision(from: response.text),
+           let spokenAnswer = cleanedQueryAnswerText(decision.spokenAnswer) {
+            let summaryLine = preferred(decision.summaryLine, nil)
+                ?? deterministicQuerySummaryLine(from: queryResult.matches, indexedCount: indexedCount)
+            return PhotoQueryAnswerOutcome(
+                assistantMessage: spokenAnswer,
+                summaryText: summaryLine,
+                runtimeStats: response.runtimeStats
+            )
+        }
+
+        ycLog("[answerQuery] ERROR Gemma response was not valid query-answer JSON; falling back to deterministic summary")
+        let fallbackAnswer = deterministicQueryAnswer(
+            for: state,
+            queryResult: queryResult,
+            indexedCount: indexedCount
+        )
 
         return PhotoQueryAnswerOutcome(
-            assistantMessage: response.text,
-            summaryText: "Local question search matched \(queryResult.matches.count) report(s) out of \(indexedCount) indexed locally.",
+            assistantMessage: fallbackAnswer.assistantMessage,
+            summaryText: fallbackAnswer.summaryText,
             runtimeStats: response.runtimeStats
         )
     }
@@ -860,22 +938,52 @@ actor PhotoTurnCoordinator {
     private func makeReportPrompt(from state: PhotoReportState) -> String {
         let vocabBlock = vocabulary.promptConstraintBlock()
         let vocabSection = vocabBlock.isEmpty ? "" : "\n\(vocabBlock)\n"
-        let known = state.fields.compactSummaryLines().joined(separator: ", ")
+        let known = state.fields.compactSummaryLines().joined(separator: "\n")
         let unknown = state.explicitlyUnknownFields.sorted().joined(separator: ", ")
+        let transcriptLines = state.transcriptSnippets.enumerated()
+            .map { idx, snippet in
+                "T\(idx + 1): \(snippet.trimmingCharacters(in: .whitespacesAndNewlines))"
+            }
+            .joined(separator: "\n")
         return """
-        Construction defect report. Output JSON only.
+        You are continuing an active construction defect intake for one staged site photo.
+        Return JSON only. No prose before or after the JSON.
 
-        Transcript: \(state.combinedTranscript)
-        Known: \(known)
-        Marked unknown: \(unknown)
+        Critical rules:
+        - Never greet the worker.
+        - Never restart the conversation.
+        - Never ask broad assistant questions like "What can I do for you?" or "How can I help?"
+        - Use the full transcript history. The latest line usually answers the previous follow-up.
+        - Do not ask for any field that is already known.
+        - If the worker says they do not know a value, keep that field null and add its field name to explicitly_unknown_fields.
+
+        Transcript history:
+        \(transcriptLines)
+
+        Known fields:
+        \(known)
+
+        Marked unknown: \(unknown.isEmpty ? "none" : unknown)
         \(vocabSection)
-        Required: defect_type, severity (low|medium|high|critical), storey, element_type. Optional: space, orientation, guid, ai_safety_notes.
+        Required fields before upload: defect_type, severity (low|medium|high|critical), storey, element_type.
+        Optional fields: space, orientation, guid, ai_safety_notes.
 
-        Use real values from the transcript or null. NEVER write "string", "or null", "<...>", or schema placeholders as values.
+        Field rules:
+        - Use real values from the transcript or null.
+        - NEVER write "string", "or null", "<...>", "unknown", or schema placeholders as actual field values.
+        - ai_safety_notes should be a brief factual note only when the worker mentioned a safety concern or useful context.
+        - If severity is present, it must be exactly one of: low, medium, high, critical.
 
-        If a required field is missing, set ready_to_upload=false and ask one short follow-up question in assistant_message. Otherwise ready_to_upload=true.
+        Follow-up rules:
+        - If any required fields are still missing, set ready_to_upload=false.
+        - assistant_message must be exactly one short, specific follow-up question.
+        - Prefer questions that fill the next missing required field before optional fields.
+        - Good assistant_message: "How severe is the hole: low, medium, high, or critical?"
+        - Bad assistant_message: "What can I do for you?"
 
-        Example output:
+        When all required fields are present or explicitly unknown, set ready_to_upload=true.
+
+        Return this JSON shape exactly:
         {"ready_to_upload":false,"assistant_message":"How severe is the crack: low, medium, high, or critical?","blocking_missing_fields":["severity"],"explicitly_unknown_fields":[],"fields":{"defect_type":"crack","severity":null,"storey":"Level 1","space":null,"orientation":"west","element_type":"wall","guid":null,"ai_safety_notes":null}}
         """
     }
@@ -898,6 +1006,38 @@ actor PhotoTurnCoordinator {
 
         Example output:
         {"ready_to_search":true,"assistant_message":"Searching prior reports.","blocking_missing_fields":[],"state":{"question_summary":"Why is there a crack on the west wall on level 1?","storey":"Level 1","space":null,"orientation":"west","element_type":"wall","timeframe_hint":null,"ambiguity_note":null}}
+        """
+    }
+
+    private func makeQueryAnswerPrompt(state: PhotoQueryState, evidence: String) -> String {
+        """
+        You are preparing a spoken update for a construction worker from local RAG results.
+        Return JSON only. No prose before or after the JSON.
+
+        Hard rules:
+        - Never greet the worker.
+        - Never ask "How can I help?" or any similar assistant question.
+        - Never say you are ready to help.
+        - Use only the retrieved evidence. Do not invent facts.
+        - If the evidence is uncertain, incomplete, or conflicting, say that plainly.
+        - `spoken_answer` must be 2 to 4 sentences suitable for text-to-speech.
+        - Start directly with the answer, not a preamble.
+
+        Worker question:
+        \(state.questionSummary ?? state.combinedTranscript)
+
+        Search context:
+        storey=\(preferred(state.storey, nil) ?? "unknown")
+        space=\(preferred(state.space, nil) ?? "unknown")
+        orientation=\(preferred(state.orientation, nil) ?? "unknown")
+        element_type=\(preferred(state.elementType, nil) ?? "unknown")
+        timeframe=\(preferred(state.timeframeHint, nil) ?? "unknown")
+
+        Retrieved evidence:
+        \(evidence)
+
+        Return this JSON shape exactly:
+        {"spoken_answer":"The closest synced report is a high-severity crack on the west wall at Level 1, reported on April 19, 2026. Its notes say the worker believed it may have been intentionally opened during construction work. I also found two other similar reports in the synced history, so this appears to match an existing issue rather than a brand-new one.","summary_line":"RAG matched 3 synced reports; top match was a west wall crack on Level 1.","cited_match_indexes":[1,2]}
         """
     }
 
@@ -925,6 +1065,18 @@ actor PhotoTurnCoordinator {
         }
     }
 
+    private func decodeQueryAnswerDecision(from rawText: String) throws -> QueryAnswerDecision? {
+        guard let jsonText = extractJSONObject(from: rawText) else {
+            return nil
+        }
+        do {
+            return try JSONDecoder().decode(QueryAnswerDecision.self, from: Data(jsonText.utf8))
+        } catch {
+            ycLog("[decodeQueryAnswerDecision] decode error: \(error)")
+            throw error
+        }
+    }
+
     private func extractJSONObject(from rawText: String) -> String? {
         let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let start = trimmed.firstIndex(of: "{"),
@@ -941,6 +1093,18 @@ actor PhotoTurnCoordinator {
         var fallbackState = state
         fallbackState.fields = fallbackState.fields.merged(with: fallbackReportFields(from: fallbackState.combinedTranscript))
         let blockingFields = blockingReportFields(for: fallbackState)
+        let isRepeated = !blockingFields.isEmpty && blockingFields == state.lastBlockingFields
+        fallbackState.repeatedFollowUpCount = isRepeated ? (state.repeatedFollowUpCount + 1) : 0
+        fallbackState.lastBlockingFields = blockingFields
+
+        if blockingFields.isEmpty {
+            fallbackState.lastBlockingFields = []
+            fallbackState.repeatedFollowUpCount = 0
+            fallbackState.fields.aiSafetyNotes = mergedReportExchangeNote(
+                into: fallbackState.fields.aiSafetyNotes,
+                transcriptSnippets: fallbackState.transcriptSnippets
+            )
+        }
 
         return PhotoReportTurnOutcome(
             state: fallbackState,
@@ -1298,6 +1462,7 @@ actor PhotoTurnCoordinator {
     private func compactEvidenceBlock(for match: LocalRAGMatch, index: Int) -> String {
         [
             "Match \(index) score=\(String(format: "%.3f", match.score))",
+            "report_id: \(match.record.id)",
             "when: \(match.record.timestamp.ISO8601Format())",
             "location: \(match.record.storey) / \(match.record.space ?? "unknown") / \(match.record.orientation ?? "unknown")",
             "issue: \(match.record.defectType) on \(match.record.elementType) severity=\(match.record.severity) resolved=\(match.record.resolved ? "yes" : "no")",
@@ -1319,6 +1484,106 @@ actor PhotoTurnCoordinator {
         }
 
         return String(collapsed.prefix(maxLength)) + "..."
+    }
+
+    private func cleanedQueryAnswerText(_ raw: String?) -> String? {
+        guard let raw else { return nil }
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        let lower = trimmed.lowercased()
+        let bannedPhrases = [
+            "how can i help",
+            "how may i help",
+            "what can i do for you",
+            "what would you like me to do",
+            "what can i help you with",
+            "ready to help",
+            "i'm ready to help",
+            "i am ready to help"
+        ]
+        guard !bannedPhrases.contains(where: { lower.contains($0) }) else {
+            return nil
+        }
+
+        return trimmed
+    }
+
+    private func deterministicQueryAnswer(
+        for state: PhotoQueryState,
+        queryResult: LocalRAGQueryResult,
+        indexedCount: Int
+    ) -> PhotoQueryAnswerOutcome {
+        let matches = Array(queryResult.matches.prefix(3))
+        let top = matches[0]
+        let topRecord = top.record
+        let dateText = topRecord.timestamp.formatted(date: .abbreviated, time: .omitted)
+        let location = locationSummary(for: topRecord)
+        let status = topRecord.resolved ? "It is marked resolved." : "It is not marked resolved."
+
+        var sentences: [String] = []
+        sentences.append("I found \(matches.count) similar synced report\(matches.count == 1 ? "" : "s").")
+        sentences.append("The closest match is a \(topRecord.severity) \(topRecord.defectType) on \(location), reported on \(dateText). \(status)")
+
+        if let evidenceSentence = topEvidenceSentence(for: topRecord, questionSummary: state.questionSummary ?? state.combinedTranscript) {
+            sentences.append(evidenceSentence)
+        }
+
+        if matches.count > 1 {
+            sentences.append("There \(matches.count == 2 ? "is 1 other similar report" : "are \(matches.count - 1) other similar reports") in the synced history as well.")
+        }
+
+        return PhotoQueryAnswerOutcome(
+            assistantMessage: sentences.joined(separator: " "),
+            summaryText: deterministicQuerySummaryLine(from: matches, indexedCount: indexedCount),
+            runtimeStats: nil
+        )
+    }
+
+    private func deterministicQuerySummaryLine(
+        from matches: [LocalRAGMatch],
+        indexedCount: Int
+    ) -> String {
+        guard let top = matches.first else {
+            return "Local question search matched 0 report(s) out of \(indexedCount) indexed locally."
+        }
+
+        return "Local question search matched \(matches.count) report(s) out of \(indexedCount) indexed locally. Top match: \(top.record.defectType) on \(locationSummary(for: top.record)) at score \(String(format: "%.3f", top.score))."
+    }
+
+    private func locationSummary(for record: CachedProjectChangeRecord) -> String {
+        var parts: [String] = []
+        if let orientation = preferred(record.orientation, nil) {
+            parts.append(orientation)
+        }
+        parts.append(record.elementType)
+        parts.append("at \(record.storey)")
+        if let space = preferred(record.space, nil) {
+            parts.append("in \(space)")
+        }
+        return parts.joined(separator: " ")
+    }
+
+    private func topEvidenceSentence(
+        for record: CachedProjectChangeRecord,
+        questionSummary: String
+    ) -> String? {
+        let normalizedQuestion = questionSummary.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+
+        if normalizedQuestion.hasPrefix("why"),
+           let notes = preferred(record.aiSafetyNotes, nil) {
+            return notes
+        }
+
+        if let notes = preferred(record.aiSafetyNotes, nil) {
+            return "The matched notes say: \(trimmedEvidenceText(notes, maxLength: 160))"
+        }
+
+        if let transcript = preferred(record.transcriptEnglish ?? record.transcriptOriginal, nil) {
+            return "The matched report says: \(trimmedEvidenceText(transcript, maxLength: 160))"
+        }
+
+        return nil
     }
 
     private func compactQuestionSummary(from text: String) -> String? {

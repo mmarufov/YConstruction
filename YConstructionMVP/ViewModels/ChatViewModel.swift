@@ -567,31 +567,18 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
+    /// Reached when the worker speaks WITHOUT a staged photo (e.g. right after
+    /// an upload completes and the session is cleared). The hackathon flow is
+    /// photo-first, so we do NOT kick off a freeform Gemma chat here — that's
+    /// what produced the spurious "Okay, I'm ready to help!" after uploads.
+    /// Just log, set a short status, and stay silent.
     private func handleGeneralAssistantTurn(
         transcript: SpeechTranscriptionResult,
         capturedAudio: CapturedAudio
     ) async throws {
-        isLoading = true
-        statusText = "Sending to local \(modelDisplayName)..."
-
-        let request = AIRequest(
-            prompt: transcript.text,
-            imagePaths: [],
-            audioPaths: LocalModelStore.supportsDirectAudioInput ? [capturedAudio.fileURL.path] : [],
-            maxTokens: 128
-        )
-        let response = try await aiService.send(
-            request: request,
-            conversation: messages
-        )
-
-        appendMessage(Message(text: response.text, sender: .assistant))
-        latestReply = response.text
-        lastRuntimeText = formatRuntimeStats(response.runtimeStats)
-        statusText = response.runtimeStats?.cloudHandoff == true
-            ? "Response arrived through cloud handoff."
-            : "Local response ready."
-        speak(response.text)
+        _ = capturedAudio
+        ycLog("[handleGeneralAssistantTurn] transcript=\"\(transcript.text)\" — no photo staged, staying silent")
+        statusText = "Take a photo to start a new report."
     }
 
     private func handleStagedPhotoTurn(
@@ -637,29 +624,12 @@ final class ChatViewModel: ObservableObject {
                 await applyReportTurnOutcome(outcome)
 
             case .query:
-                ycLog("[handleStagedPhotoTurn] intent=query — RAG path will be invoked once question is ready")
-                isLoading = true
-                statusText = "Preparing the local question search..."
-                stagedPhotoStatusText = "Photo staged for a local question."
-                let existingState = PhotoQueryState(
-                    createdAt: createdAt,
-                    transcriptSnippets: Array(history.dropLast()),
-                    questionSummary: nil,
-                    storey: nil,
-                    space: nil,
-                    orientation: nil,
-                    elementType: nil,
-                    timeframeHint: nil,
-                    ambiguityNote: nil
-                )
-                let outcome = try await photoTurnCoordinator.processQueryTurn(
-                    existingState: existingState,
-                    newTranscript: transcript.text,
+                ycLog("[handleStagedPhotoTurn] intent=query — RAG activating directly")
+                await runDirectRAG(
+                    transcript: transcript.text,
                     createdAt: createdAt,
                     stagedPhotoPath: stagedPhotoPath
                 )
-                lastRuntimeText = formatRuntimeStats(outcome.runtimeStats)
-                await applyQueryTurnOutcome(outcome)
 
             case .unclear:
                 stagedPhotoSession = .awaitingIntent(createdAt: createdAt, transcriptSnippets: history)
@@ -673,26 +643,7 @@ final class ChatViewModel: ObservableObject {
             }
 
         case .report(let state):
-            if let pivotIntent = await photoTurnCoordinator.pivotIntent(
-                for: transcript.text,
-                currentIntent: .report,
-                cachedRecords: cachedRecords
-            ), pivotIntent == .query {
-                ycLog("[handleStagedPhotoTurn] pivoted report→query — RAG path will be invoked")
-                isLoading = true
-                statusText = "Switching to a local question search..."
-                stagedPhotoStatusText = "Photo staged for a local question."
-                let outcome = try await photoTurnCoordinator.processQueryTurn(
-                    existingState: makeQueryPivotState(from: state),
-                    newTranscript: transcript.text,
-                    createdAt: state.createdAt,
-                    stagedPhotoPath: stagedPhotoPath
-                )
-                lastRuntimeText = formatRuntimeStats(outcome.runtimeStats)
-                await applyQueryTurnOutcome(outcome)
-                return
-            }
-
+            // Continue the active report intake until the required fields are captured.
             isLoading = true
             statusText = "Reviewing the new report..."
             let outcome = try await photoTurnCoordinator.processReportTurn(
@@ -705,37 +656,75 @@ final class ChatViewModel: ObservableObject {
             await applyReportTurnOutcome(outcome)
 
         case .query(let state):
-            if let pivotIntent = await photoTurnCoordinator.pivotIntent(
-                for: transcript.text,
-                currentIntent: .query,
-                cachedRecords: cachedRecords
-            ), pivotIntent == .report {
-                ycLog("[handleStagedPhotoTurn] pivoted query→report — RAG NOT used")
-                isLoading = true
-                statusText = "Switching to a new report..."
-                stagedPhotoStatusText = "Photo staged for a new report."
-                let outcome = try await photoTurnCoordinator.processReportTurn(
-                    existingState: makeReportPivotState(from: state),
-                    newTranscript: transcript.text,
-                    createdAt: state.createdAt,
-                    stagedPhotoPath: stagedPhotoPath
-                )
-                lastRuntimeText = formatRuntimeStats(outcome.runtimeStats)
-                await applyReportTurnOutcome(outcome)
-                return
-            }
-
-            isLoading = true
-            statusText = "Preparing the local question search..."
-            let outcome = try await photoTurnCoordinator.processQueryTurn(
-                existingState: state,
-                newTranscript: transcript.text,
+            // Direct RAG path — no pivot, no Gemma JSON extractor.
+            await runDirectRAG(
+                transcript: transcript.text,
                 createdAt: state.createdAt,
                 stagedPhotoPath: stagedPhotoPath
             )
-            lastRuntimeText = formatRuntimeStats(outcome.runtimeStats)
-            await applyQueryTurnOutcome(outcome)
         }
+    }
+
+    /// Direct RAG execution: announce "RAG activated", then run `answerQuery`
+    /// with the raw transcript as the question (no processQueryTurn JSON
+    /// extraction). The final spoken answer is cleaned before TTS so generic
+    /// assistant chatter cannot leak into speech.
+    private func runDirectRAG(
+        transcript: String,
+        createdAt: Date,
+        stagedPhotoPath: String?
+    ) async {
+        isLoading = true
+        statusText = "RAG activated…"
+        stagedPhotoStatusText = "Searching synced history…"
+
+        ycLog("[runDirectRAG] transcript=\"\(transcript)\" photo=\(stagedPhotoPath ?? "nil")")
+
+        // Spoken acknowledgement before the heavy lifting.
+        let activationMessage = "RAG activated."
+        appendMessage(Message(text: activationMessage, sender: .assistant))
+        latestReply = activationMessage
+        speak(activationMessage)
+
+        let queryState = PhotoQueryState(
+            createdAt: createdAt,
+            transcriptSnippets: [transcript],
+            questionSummary: transcript.trimmingCharacters(in: .whitespacesAndNewlines),
+            storey: nil,
+            space: nil,
+            orientation: nil,
+            elementType: nil,
+            timeframeHint: nil,
+            ambiguityNote: nil
+        )
+        stagedPhotoSession = .query(queryState)
+
+        do {
+            let cachedRecords = await defectSyncService.cachedProjectChangesForRetrieval()
+            let answerOutcome = try await photoTurnCoordinator.answerQuery(
+                state: queryState,
+                cachedRecords: cachedRecords,
+                stagedPhotoPath: stagedPhotoPath
+            )
+            appendMessage(Message(text: answerOutcome.assistantMessage, sender: .assistant))
+            latestReply = answerOutcome.assistantMessage
+            lastRuntimeText = formatRuntimeStats(answerOutcome.runtimeStats)
+            statusText = "Local answer ready."
+            lastInputSummary = answerOutcome.summaryText
+            speak(answerOutcome.assistantMessage)
+            clearStagedPhotoSession(deleteLocalPhoto: true)
+            await refreshLocalSearchStatus()
+        } catch {
+            ycLog("[runDirectRAG] ERROR \(error.localizedDescription)")
+            appendMessage(Message(text: error.localizedDescription, sender: .assistant))
+            latestReply = error.localizedDescription
+            statusText = "RAG failed."
+            lastInputSummary = "RAG pipeline was not ready."
+            speak(error.localizedDescription)
+            localSearchStatusText = error.localizedDescription
+        }
+
+        isLoading = false
     }
 
     private func applyReportTurnOutcome(_ outcome: PhotoReportTurnOutcome) async {
@@ -767,11 +756,11 @@ final class ChatViewModel: ObservableObject {
 
                 let assistantText: String
                 if syncResult.wasUploaded && syncResult.photoUploaded {
-                    assistantText = "Uploaded to Supabase."
-                    statusText = "Uploaded to Supabase."
+                    assistantText = "Uploaded to Supabase. Done!"
+                    statusText = "Uploaded to Supabase. Done!"
                     showToast("Uploaded to Supabase")
                 } else {
-                    assistantText = "Issue saved locally with its photo. It will upload automatically on Wi-Fi or when you tap Sync Now."
+                    assistantText = "Saved locally. Done!"
                     statusText = "Issue queued locally for Supabase."
                     showToast("Queued locally — will upload on Wi-Fi")
                 }
@@ -786,6 +775,9 @@ final class ChatViewModel: ObservableObject {
 
                 clearStagedPhotoSession(deleteLocalPhoto: false)
                 await refreshLocalSearchStatus()
+                // Intentionally no post-upload Gemma call. The multi-turn flow
+                // already asked its follow-ups BEFORE upload; after upload the
+                // assistant stays silent until the next photo.
             } catch {
                 stagedPhotoSession = .report(outcome.state)
                 let assistantText = "I mapped the report, but saving it for Supabase failed. The staged photo is still here, and you can try again. \(error.localizedDescription)"
@@ -797,8 +789,8 @@ final class ChatViewModel: ObservableObject {
             }
         } else {
             stagedPhotoSession = .report(outcome.state)
-            stagedPhotoStatusText = "Photo staged for a new report. Answer the follow-up to finish tagging it."
-            statusText = "Waiting for one more report detail before upload."
+            stagedPhotoStatusText = "Photo staged for a new report. Answer the follow-up to keep tagging it."
+            statusText = "Waiting for more report details before upload."
             appendMessage(Message(text: outcome.assistantMessage, sender: .assistant))
             latestReply = outcome.assistantMessage
             speak(outcome.assistantMessage)
@@ -815,27 +807,17 @@ final class ChatViewModel: ObservableObject {
             statusText = "Searching synced reports on this iPhone..."
             do {
                 let cachedRecords = await defectSyncService.cachedProjectChangesForRetrieval()
-                let speaker = StreamingSentenceSpeaker(synthesizer: synthesizer)
                 let answerOutcome = try await photoTurnCoordinator.answerQuery(
                     state: outcome.state,
                     cachedRecords: cachedRecords,
-                    stagedPhotoPath: stagedPhotoURL?.path,
-                    onToken: { token in
-                        Task { @MainActor in
-                            speaker.ingest(token)
-                        }
-                    }
+                    stagedPhotoPath: stagedPhotoURL?.path
                 )
-                speaker.flush()
                 appendMessage(Message(text: answerOutcome.assistantMessage, sender: .assistant))
                 latestReply = answerOutcome.assistantMessage
                 lastRuntimeText = formatRuntimeStats(answerOutcome.runtimeStats)
                 statusText = "Local answer ready."
                 lastInputSummary = answerOutcome.summaryText
-                // Only speak the full text if streaming never fired (e.g., MockAIService fallback).
-                if !speaker.didSpeakAnything {
-                    speak(answerOutcome.assistantMessage)
-                }
+                speak(answerOutcome.assistantMessage)
                 clearStagedPhotoSession(deleteLocalPhoto: true)
                 await refreshLocalSearchStatus()
             } catch {
@@ -918,6 +900,22 @@ final class ChatViewModel: ObservableObject {
         utterance.prefersAssistiveTechnologySettings = true
 
         synthesizer.stopSpeaking(at: .immediate)
+        synthesizer.speak(utterance)
+    }
+
+    /// Queue an utterance without interrupting the currently-playing one. Used
+    /// for "follow-up" messages that should play AFTER a prior `speak(...)`
+    /// has finished — e.g. the Gemma insight after "Uploaded to Supabase."
+    /// Config is identical to `speak()` so the voice matches exactly.
+    private func speakQueued(_ text: String) {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        ycLog("[speakQueued] len=\(trimmed.count) preview=\"\(trimmed.prefix(160))\"")
+        guard !trimmed.isEmpty else { return }
+
+        let utterance = AVSpeechUtterance(string: trimmed)
+        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+        utterance.rate = 0.5
+        utterance.prefersAssistiveTechnologySettings = true
         synthesizer.speak(utterance)
     }
 
@@ -1148,7 +1146,11 @@ private final class StreamingSentenceSpeaker {
 
     init(synthesizer: AVSpeechSynthesizer) {
         self.synthesizer = synthesizer
-        synthesizer.stopSpeaking(at: .immediate)
+        // Note: do NOT call stopSpeaking(at: .immediate) here — it clips the
+        // previous utterance (e.g., "Uploaded to Supabase") mid-sentence and
+        // AVSpeechSynthesizer occasionally picks a different voice track when
+        // re-started. We rely on AVSpeechSynthesizer's built-in queueing so
+        // streamed sentences play right after the ack.
     }
 
     /// Append a new token; speak any newly-complete sentences in the buffer.
@@ -1172,9 +1174,13 @@ private final class StreamingSentenceSpeaker {
     private func speak(_ text: String) {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
+        // Match ChatViewModel.speak()'s utterance config exactly — same voice,
+        // same rate, same assistive flag — so streamed sentences sound like
+        // a single continuous speaker rather than a second voice.
         let utterance = AVSpeechUtterance(string: trimmed)
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         utterance.rate = 0.5
+        utterance.prefersAssistiveTechnologySettings = true
         synthesizer.speak(utterance)
         didSpeakAnything = true
     }
