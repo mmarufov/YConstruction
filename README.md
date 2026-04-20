@@ -11,6 +11,17 @@
   Blender review workflow for the architect.</em>
 </p>
 
+<table align="center">
+  <tr>
+    <td align="center"><img src="docs/screenshot-iphone.png"  alt="YConstruction iPhone app" width="240"></td>
+    <td align="center"><img src="docs/screenshot-blender.png" alt="YConstruction sidebar in Blender/Bonsai" width="380"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Worker's iPhone — on-device Gemma 3n + Whisper + Qwen3, live Supabase sync.</sub></td>
+    <td align="center"><sub>Architect's Blender with the YConstruction sidebar — defects stream in live.</sub></td>
+  </tr>
+</table>
+
 ---
 
 ## The idea
