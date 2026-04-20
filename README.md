@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo.png" alt="YConstruction logo" width="220">
+  <img src="docs/logo.png" alt="YConstruction logo" width="60">
 </p>
 
 <h1 align="center">YConstruction</h1>
