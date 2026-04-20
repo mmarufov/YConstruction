@@ -30,18 +30,12 @@ final class SyncService: ObservableObject {
         "yconstruction.lastSyncedAt.\(projectId)"
     }
 
-    private static func catchUpCursorKey(projectId: String) -> String {
-        "yconstruction.catchUpCursor.\(projectId)"
-    }
-
     private let database: DatabaseService
     private let supabase: SupabaseClientService
     private let store: DefectStore
     private let monitor = NWPathMonitor()
     private let monitorQueue = DispatchQueue(label: "com.yconstruction.network")
     private var periodicTask: Task<Void, Never>?
-    private var realtimeTask: Task<Void, Never>?
-    private var catchUpCursor: String?
 
     init(store: DefectStore,
          database: DatabaseService = .shared,
@@ -54,9 +48,8 @@ final class SyncService: ObservableObject {
         ) as? Date {
             self.lastSyncedAt = stamp
         }
-        self.catchUpCursor = UserDefaults.standard.string(
-            forKey: Self.catchUpCursorKey(projectId: store.projectId)
-        )
+        // Proactively drop any stale cursor from an older build.
+        UserDefaults.standard.removeObject(forKey: "yconstruction.catchUpCursor.\(store.projectId)")
     }
 
     func start() {
@@ -71,9 +64,6 @@ final class SyncService: ObservableObject {
                 self.isOnWiFi = nowOnline && path.usesInterfaceType(.wifi)
                 if nowOnline && !wasOnline {
                     await self.reconnectSync()
-                    self.startRealtime()
-                } else if !nowOnline {
-                    self.stopRealtime()
                 }
             }
         }
@@ -81,7 +71,10 @@ final class SyncService: ObservableObject {
 
         periodicTask = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 10_000_000_000)
+                // 5 s matches the Blender plugin's poll cadence. Pure
+                // stateless re-fetch — no cursor, no realtime — so a missed
+                // row simply shows up on the next tick.
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
                 await self?.syncIfOnline()
             }
         }
@@ -110,7 +103,6 @@ final class SyncService: ObservableObject {
         monitor.cancel()
         periodicTask?.cancel()
         periodicTask = nil
-        stopRealtime()
     }
 
     // MARK: - Public orchestration
@@ -135,48 +127,14 @@ final class SyncService: ObservableObject {
         await reconcileWithCloud()
     }
 
-    /// Cloud-authoritative reconciliation. Pulls the full set of
-    /// `project_changes` row IDs for this project and deletes any local row
-    /// whose ID is missing upstream (only synced rows — unsynced rows are
-    /// queued uploads that must be preserved). Also drops the cached project
-    /// bundle on disk and fires `bundleInvalidationTick` if the `projects`
-    /// manifest row is gone.
+    /// Project-bundle reconciliation: if the `projects` manifest row for this
+    /// project is gone, drop the cached GLB + element index on disk and bump
+    /// `bundleInvalidationTick` so MainView re-runs boot. Defect reconciliation
+    /// lives in `catchUpRemote()` now — it already re-fetches the full list
+    /// each tick and prunes anything the cloud doesn't have.
     func reconcileWithCloud() async {
         guard supabase.isConfigured, let client = supabase.client() else { return }
 
-        // 1) Defects — diff cloud IDs against local IDs, prune the difference.
-        do {
-            let rows: [[String: AnyJSON]] = try await client
-                .from("project_changes")
-                .select("id")
-                .eq("project_id", value: store.projectId)
-                .execute()
-                .value
-            let cloudIds = Set(rows.compactMap { $0["id"]?.stringValue })
-            let localIds = Set((try? database.ids(projectId: store.projectId)) ?? [])
-            let orphaned = localIds.subtracting(cloudIds)
-            var prunedCount = 0
-            for id in orphaned {
-                // Preserve unsynced rows — those are uploads in flight.
-                if let defect = try? database.defect(id: id), !defect.synced { continue }
-                try? database.delete(id: id)
-                prunedCount += 1
-            }
-            if prunedCount > 0 || cloudIds.isEmpty {
-                catchUpCursor = nil
-                UserDefaults.standard.removeObject(
-                    forKey: Self.catchUpCursorKey(projectId: store.projectId)
-                )
-                store.refresh()
-                print("[Sync] reconcile: cloud=\(cloudIds.count) local=\(localIds.count) pruned=\(prunedCount)")
-            }
-        } catch {
-            print("[Sync] reconcile (defects) failed: \(error)")
-        }
-
-        // 2) Project bundle — if the manifest row is gone, clear the on-disk
-        // cache and bump the invalidation tick so MainView re-runs boot and
-        // the renderer drops its in-memory geometry.
         do {
             let projectRows: [[String: AnyJSON]] = try await client
                 .from("projects")
@@ -248,38 +206,42 @@ final class SyncService: ObservableObject {
         stampLastSynced()
     }
 
-    // MARK: - Catch-up
+    // MARK: - Catch-up (stateless full-list poll, Blender-style)
 
+    /// Re-fetches the entire `project_changes` list for this project, upserts
+    /// each row locally, and prunes anything the cloud no longer has. No
+    /// cursor, no realtime — each tick is independent and self-correcting, so
+    /// a missed or failed row always retries on the next tick.
     private func catchUpRemote() async {
         guard supabase.isConfigured, let client = supabase.client() else { return }
-        let sinceString = catchUpCursor ?? "1970-01-01T00:00:00+00:00"
         do {
             let rows: [[String: AnyJSON]] = try await client
                 .from("project_changes")
                 .select()
                 .eq("project_id", value: store.projectId)
-                .gt("updated_at", value: sinceString)
                 .order("updated_at", ascending: true)
                 .execute()
                 .value
+
+            var cloudIds = Set<String>()
             for row in rows {
+                if let id = row["id"]?.stringValue {
+                    cloudIds.insert(id)
+                }
                 await handleRemote(row)
-                advanceCatchUpCursor(from: row)
             }
+
+            // Prune local rows missing upstream. Keep unsynced rows — they're
+            // uploads still queued for drain.
+            let localIds = Set((try? database.ids(projectId: store.projectId)) ?? [])
+            for id in localIds.subtracting(cloudIds) {
+                if let d = try? database.defect(id: id), !d.synced { continue }
+                try? database.delete(id: id)
+            }
+            store.refresh()
             stampLastSynced()
         } catch {
-            print("catchUp error: \(error)")
-        }
-    }
-
-    private func advanceCatchUpCursor(from record: [String: AnyJSON]) {
-        guard let str = record["updated_at"]?.stringValue else { return }
-        if catchUpCursor == nil || str > catchUpCursor! {
-            catchUpCursor = str
-            UserDefaults.standard.set(
-                str,
-                forKey: Self.catchUpCursorKey(projectId: store.projectId)
-            )
+            print("[Sync] catchUp error: \(error)")
         }
     }
 
@@ -365,66 +327,11 @@ final class SyncService: ObservableObject {
             .absoluteString
     }
 
-    // MARK: - Realtime
+    // MARK: - Remote → local apply
 
-    private func startRealtime() {
-        guard supabase.isConfigured, let client = supabase.client() else { return }
-        realtimeTask?.cancel()
-
-        let projectId = store.projectId
-        realtimeTask = Task { [weak self] in
-            var backoff: UInt64 = 2_000_000_000 // 2s
-            while !Task.isCancelled {
-                do {
-                    let channel = client.realtimeV2.channel("project_changes:\(projectId)")
-                    let changes = channel.postgresChange(
-                        AnyAction.self,
-                        schema: "public",
-                        table: "project_changes",
-                        filter: "project_id=eq.\(projectId)"
-                    )
-                    try await channel.subscribe()
-                    backoff = 2_000_000_000
-                    for await change in changes {
-                        guard let self else { return }
-                        switch change {
-                        case .insert(let action):
-                            await self.handleRealtimeRecord(action.record)
-                        case .update(let action):
-                            await self.handleRealtimeRecord(action.record)
-                        case .delete(let action):
-                            await self.handleRealtimeDelete(action.oldRecord)
-                        default:
-                            break
-                        }
-                    }
-                } catch {
-                    print("realtime error: \(error)")
-                }
-                if Task.isCancelled { return }
-                try? await Task.sleep(nanoseconds: backoff)
-                backoff = min(backoff * 2, 30_000_000_000)
-            }
-        }
-    }
-
-    private func stopRealtime() {
-        realtimeTask?.cancel()
-        realtimeTask = nil
-    }
-
-    private func handleRealtimeRecord(_ record: [String: AnyJSON]) async {
-        await handleRemote(record)
-        advanceCatchUpCursor(from: record)
-    }
-
-    private func handleRealtimeDelete(_ oldRecord: [String: AnyJSON]) async {
-        guard let id = oldRecord["id"]?.stringValue else { return }
-        try? database.delete(id: id)
-        store.refresh()
-        print("[Sync] realtime delete for id=\(id)")
-    }
-
+    /// Upserts a single row from `project_changes` into the local DB,
+    /// preserving the local photo path when the file is already cached on
+    /// device. Silent on failure — the next poll tick will retry.
     private func handleRemote(_ record: [String: AnyJSON]) async {
         do {
             let jsonObject = record.mapValues { $0.value }
@@ -444,9 +351,9 @@ final class SyncService: ObservableObject {
             }
             defect.synced = true
             try database.upsert(defect)
-            store.refresh()
         } catch {
-            print("failed to decode remote defect: \(error)")
+            let id = record["id"]?.stringValue ?? "?"
+            print("[Sync] failed to persist remote defect id=\(id): \(error)")
         }
     }
 }
